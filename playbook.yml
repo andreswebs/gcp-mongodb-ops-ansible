@@ -1,0 +1,124 @@
+#!/usr/bin/env ansible-playbook
+---
+- name: MongoDB
+
+  hosts: all
+  become: yes
+  become_user: root
+
+  vars:
+    key_dir: /etc/apt/trusted.gpg.d
+    # key_dir: /usr/share/keyrings
+    mongodb_version: '4.4'
+    mongodb_key_url: "https://www.mongodb.org/static/pgp/server-{{ mongodb_version }}.asc"
+    mongodb_key_file: "{{ key_dir }}/mongodb-{{ mongodb_version }}.asc"
+    nodejs_version: node_16.x
+    nodejs_key_url: https://deb.nodesource.com/gpgkey/nodesource.gpg.key
+    nodejs_key_file: "{{ key_dir }}/nodesource.gpg.key"
+
+  tasks:
+
+    - name: Wait for VMs to start
+      wait_for_connection:
+
+    # System update
+    - name: Upgrade system
+      ansible.builtin.apt:
+        update_cache: yes
+        upgrade: dist
+        autoremove: yes
+        autoclean: yes
+      async: 3600
+      poll: 5
+      tags:
+        - system
+
+    - name: Install dependencies
+      ansible.builtin.apt:
+        name:
+          - apt-transport-https
+      tags:
+        - deps
+
+    - name: DEB architecture
+      ansible.builtin.shell: dpkg --print-architecture
+      register: deb_architecture
+      changed_when: false
+      tags:
+        - mongodb
+        - nodejs
+
+    - name: MongoDB | key
+      ansible.builtin.get_url:
+        url: "{{ mongodb_key_url }}"
+        dest: "{{ mongodb_key_file }}"
+      tags:
+        - mongodb
+
+    - name: MongoDB | apt source
+      ansible.builtin.apt_repository:
+        repo: "deb [arch={{ deb_architecture.stdout }} signed-by={{ mongodb_key_file }}] https://repo.mongodb.org/apt/ubuntu {{ ansible_distribution_release }}/mongodb-org/{{ mongodb_version }} multiverse"
+        state: present
+        filename: "mongodb-org-{{ mongodb_version }}"
+      tags:
+        - mongodb
+
+    - name: MongoDB | install packages
+      ansible.builtin.apt:
+        update_cache: yes
+        name:
+          - mongodb-org
+          - mongodb-org-server
+          - mongodb-org-shell
+          - mongodb-org-mongos
+          - mongodb-org-tools
+          - python3-pymongo
+      tags:
+        - mongodb
+
+    - name: MongoDB | start and enable service
+      ansible.builtin.service:
+        name: mongod.service
+        state: started
+        enabled: yes
+      tags:
+        - mongodb
+
+    - name: NodeJS | key
+      ansible.builtin.get_url:
+        url: "{{ nodejs_key_url }}"
+        dest: "{{ nodejs_key_file }}"
+      tags:
+        - nodejs
+
+    - name: NodeJS | apt source
+      ansible.builtin.apt_repository:
+        repo: "deb [arch={{ deb_architecture.stdout }} signed-by={{ nodejs_key_file }}] https://deb.nodesource.com/node_16.x {{ ansible_distribution_release }} main"
+        state: present
+        filename: nodesource
+      tags:
+        - nodejs
+
+    - name: NodeJS | install packages
+      ansible.builtin.apt:
+        update_cache: yes
+        name:
+          - nodejs
+      tags:
+        - nodejs
+
+    # System check
+    - name: Check if a reboot is required
+      ansible.builtin.shell: "[ -f /var/run/reboot-required ]"
+      failed_when: false
+      register: reboot_required
+      changed_when: reboot_required.rc == 0
+      notify: Reboot instance
+      tags:
+        - system
+
+  handlers:
+
+    - name: Reboot instance
+      reboot:
+        msg: Maintenance reboot initiated
