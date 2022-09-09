@@ -1,0 +1,9 @@
+tls_dir: /home/www/tls
+file_ca_crt: ca.crt
+file_tls_crt: wildcard.planhat.dev.crt
+file_tls_key: wildcard.planhat.dev.key
+file_tls_pem: wildcard.planhat.dev.pem
+secret_name_ca_crt: ca_crt
+secret_name_tls_crt: wildcard_planhat_dev_crt
+secret_name_tls_key: wildcard_planhat_dev_key
+secret_name_tls_pem: wildcard_planhat_dev_pem

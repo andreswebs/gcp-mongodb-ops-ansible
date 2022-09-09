@@ -40,6 +40,12 @@
       tags:
         - deps
 
+    - ansible.builtin.import_role:
+        name: secure-disk
+
+    - ansible.builtin.import_role:
+        name: www-user
+
     - name: DEB architecture
       ansible.builtin.shell: dpkg --print-architecture
       register: deb_architecture
@@ -79,8 +85,8 @@
     - name: MongoDB | start and enable service
       ansible.builtin.service:
         name: mongod.service
-        state: started
-        enabled: yes
+        state: stopped
+        enabled: no
       tags:
         - mongodb
 
