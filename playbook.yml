@@ -15,6 +15,7 @@
     nodejs_version: node_16.x
     nodejs_key_url: https://deb.nodesource.com/gpgkey/nodesource.gpg.key
     nodejs_key_file: "{{ key_dir }}/nodesource.gpg.key"
+    mongodb_replica_set:
 
   tasks:
 
@@ -42,9 +43,6 @@
 
     - ansible.builtin.import_role:
         name: secure-disk
-
-    - ansible.builtin.import_role:
-        name: www-user
 
     - name: DEB architecture
       ansible.builtin.shell: dpkg --print-architecture
@@ -112,6 +110,11 @@
           - nodejs
       tags:
         - nodejs
+
+    - ansible.builtin.import_role:
+        name: www-user
+      vars:
+        www_tls_dir_owner: mongodb
 
     # System check
     - name: Check if a reboot is required

@@ -1,33 +1,42 @@
 ---
-- name: Add group
+- name: "Create {{ www_user }} group"
   ansible.builtin.group:
-    name: www
+    name: "{{ www_user }}"
     state: present
 
-- name: Add user
+- name: "Create {{ www_user }} user"
   ansible.builtin.user:
-    name: www
-    shell: /bin/bash
-    group: www
+    name: "{{ www_user }}"
+    group: "{{ www_user }}"
     groups: sudo
     append: yes
+    shell: /bin/bash
 
-- name: Allow passwordless sudo
+- name: "Allow {{ www_user }} passwordless sudo"
   ansible.builtin.blockinfile:
     path: /etc/sudoers
     block: |
-      www ALL=(ALL) NOPASSWD: ALL
+      {{ www_user }} ALL=(ALL) NOPASSWD: ALL
     validate: 'visudo -cf %s'
 
-- name: "Create {{ tls_dir }}"
+- name: "Create {{ www_tls_dir }}"
   ansible.builtin.file:
-    path: "{{ tls_dir }}"
+    path: "{{ www_tls_dir }}"
     state: directory
-    owner: www
-    group: www
+    owner: "{{ www_tls_dir_owner }}"
+    group: "{{ www_tls_dir_owner }}"
     mode: '0700'
 
-- name: "Retrieve {{ secret_name_ca_crt }} from Secret Manager"
+- name: "Ensure {{ www_tls_dir_owner }} has read/execute permissions on {{ www_tls_dir }}/.."
+  ansible.posix.acl:
+    state: present
+    default: yes
+    path: "{{ www_tls_dir }}/.."
+    etype: user
+    entity: "{{ www_tls_dir_owner }}"
+    permissions: rX
+
+- name: "Retrieve {{ www_secret_name_ca_crt }} from Secret Manager"
   ansible.builtin.command: "gcloud secrets versions access latest --secret ca_crt"
   connection: local
   become: no
@@ -39,17 +48,17 @@
   environment:
     CLOUDSDK_CORE_PROJECT: "{{ lookup('ansible.builtin.env', 'CLOUDSDK_CORE_PROJECT') }}"
 
-- name: "Write {{ tls_dir }}/{{ file_ca_crt }}"
+- name: "Write {{ www_tls_dir }}/{{ www_file_ca_crt }}"
   copy:
-    dest: "{{ tls_dir }}/{{ file_ca_crt }}"
+    dest: "{{ www_tls_dir }}/{{ www_file_ca_crt }}"
     content: "{{ www_ca_crt.stdout }}"
-    owner: www
-    group: www
+    owner: "{{ www_tls_dir_owner }}"
+    group: "{{ www_tls_dir_owner }}"
     mode: '0600'
   no_log: "{{ not display_diff_secrets }}"
 
-- name: "Retrieve {{ secret_name_tls_crt }} from Secret Manager"
-  ansible.builtin.command: "gcloud secrets versions access latest --secret {{ secret_name_tls_crt }}"
+- name: "Retrieve {{ www_secret_name_tls_crt }} from Secret Manager"
+  ansible.builtin.command: "gcloud secrets versions access latest --secret {{ www_secret_name_tls_crt }}"
   connection: local
   become: no
   run_once: true
@@ -60,17 +69,17 @@
   environment:
     CLOUDSDK_CORE_PROJECT: "{{ lookup('ansible.builtin.env', 'CLOUDSDK_CORE_PROJECT') }}"
 
-- name: "Write {{ tls_dir }}/{{ file_tls_crt }}"
+- name: "Write {{ www_tls_dir }}/{{ www_file_tls_crt }}"
   ansible.builtin.copy:
-    dest: "{{ tls_dir }}/{{ file_tls_crt }}"
+    dest: "{{ www_tls_dir }}/{{ www_file_tls_crt }}"
     content: "{{ www_tls_crt.stdout }}"
-    owner: www
-    group: www
+    owner: "{{ www_tls_dir_owner }}"
+    group: "{{ www_tls_dir_owner }}"
     mode: '0600'
   no_log: "{{ not display_diff_secrets }}"
 
-- name: "Retrieve {{ secret_name_tls_key }} from Secret Manager"
-  ansible.builtin.command: "gcloud secrets versions access latest --secret {{ secret_name_tls_key }}"
+- name: "Retrieve {{ www_secret_name_tls_key }} from Secret Manager"
+  ansible.builtin.command: "gcloud secrets versions access latest --secret {{ www_secret_name_tls_key }}"
   connection: local
   become: no
   run_once: true
@@ -81,17 +90,17 @@
   environment:
     CLOUDSDK_CORE_PROJECT: "{{ lookup('ansible.builtin.env', 'CLOUDSDK_CORE_PROJECT') }}"
 
-- name: "Write {{ tls_dir }}/{{ file_tls_key }}"
+- name: "Write {{ www_tls_dir }}/{{ www_file_tls_key }}"
   ansible.builtin.copy:
-    dest: "{{ tls_dir }}/{{ file_tls_key }}"
+    dest: "{{ www_tls_dir }}/{{ www_file_tls_key }}"
     content: "{{ www_tls_key.stdout }}"
-    owner: www
-    group: www
+    owner: "{{ www_tls_dir_owner }}"
+    group: "{{ www_tls_dir_owner }}"
     mode: '0600'
   no_log: "{{ not display_diff_secrets }}"
 
-- name: "Retrieve {{ secret_name_tls_pem }} from Secret Manager"
-  ansible.builtin.command: "gcloud secrets versions access latest --secret {{ secret_name_tls_pem }}"
+- name: "Retrieve {{ www_secret_name_tls_pem }} from Secret Manager"
+  ansible.builtin.command: "gcloud secrets versions access latest --secret {{ www_secret_name_tls_pem }}"
   connection: local
   become: no
   run_once: true
@@ -102,11 +111,11 @@
   environment:
     CLOUDSDK_CORE_PROJECT: "{{ lookup('ansible.builtin.env', 'CLOUDSDK_CORE_PROJECT') }}"
 
-- name: "Write {{ tls_dir }}/{{ file_tls_pem }}"
+- name: "Write {{ www_tls_dir }}/{{ www_file_tls_pem }}"
   ansible.builtin.copy:
-    dest: "{{ tls_dir }}/{{ file_tls_pem }}"
+    dest: "{{ www_tls_dir }}/{{ www_file_tls_pem }}"
     content: "{{ www_tls_pem.stdout }}"
-    owner: www
-    group: www
+    owner: "{{ www_tls_dir_owner }}"
+    group: "{{ www_tls_dir_owner }}"
     mode: '0600'
   no_log: "{{ not display_diff_secrets }}"
