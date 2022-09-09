@@ -3,6 +3,8 @@
   ansible.builtin.group:
     name: "{{ www_user }}"
     state: present
+  tags:
+    - www-user
 
 - name: "Create {{ www_user }} user"
   ansible.builtin.user:
@@ -11,6 +13,8 @@
     groups: sudo
     append: yes
     shell: /bin/bash
+  tags:
+    - www-user
 
 - name: "Allow {{ www_user }} passwordless sudo"
   ansible.builtin.blockinfile:
@@ -18,6 +22,8 @@
     block: |
       {{ www_user }} ALL=(ALL) NOPASSWD: ALL
     validate: 'visudo -cf %s'
+  tags:
+    - www-user
 
 - name: "Create {{ www_tls_dir }}"
   ansible.builtin.file:
@@ -26,6 +32,8 @@
     owner: "{{ www_tls_dir_owner }}"
     group: "{{ www_tls_dir_owner }}"
     mode: '0700'
+  tags:
+    - www-user
 
 - name: "Ensure {{ www_tls_dir_owner }} has read/execute permissions on {{ www_tls_dir }}/.."
   ansible.posix.acl:
@@ -35,6 +43,8 @@
     etype: user
     entity: "{{ www_tls_dir_owner }}"
     permissions: rX
+  tags:
+    - www-user
 
 - name: "Retrieve {{ www_secret_name_ca_crt }} from Secret Manager"
   ansible.builtin.command: "gcloud secrets versions access latest --secret ca_crt"
@@ -47,6 +57,8 @@
   no_log: "{{ not display_diff_secrets }}"
   environment:
     CLOUDSDK_CORE_PROJECT: "{{ lookup('ansible.builtin.env', 'CLOUDSDK_CORE_PROJECT') }}"
+  tags:
+    - www-user
 
 - name: "Write {{ www_tls_dir }}/{{ www_file_ca_crt }}"
   copy:
@@ -56,6 +68,8 @@
     group: "{{ www_tls_dir_owner }}"
     mode: '0600'
   no_log: "{{ not display_diff_secrets }}"
+  tags:
+    - www-user
 
 - name: "Retrieve {{ www_secret_name_tls_crt }} from Secret Manager"
   ansible.builtin.command: "gcloud secrets versions access latest --secret {{ www_secret_name_tls_crt }}"
@@ -68,6 +82,8 @@
   no_log: "{{ not display_diff_secrets }}"
   environment:
     CLOUDSDK_CORE_PROJECT: "{{ lookup('ansible.builtin.env', 'CLOUDSDK_CORE_PROJECT') }}"
+  tags:
+    - www-user
 
 - name: "Write {{ www_tls_dir }}/{{ www_file_tls_crt }}"
   ansible.builtin.copy:
@@ -77,6 +93,8 @@
     group: "{{ www_tls_dir_owner }}"
     mode: '0600'
   no_log: "{{ not display_diff_secrets }}"
+  tags:
+    - www-user
 
 - name: "Retrieve {{ www_secret_name_tls_key }} from Secret Manager"
   ansible.builtin.command: "gcloud secrets versions access latest --secret {{ www_secret_name_tls_key }}"
@@ -89,6 +107,8 @@
   no_log: "{{ not display_diff_secrets }}"
   environment:
     CLOUDSDK_CORE_PROJECT: "{{ lookup('ansible.builtin.env', 'CLOUDSDK_CORE_PROJECT') }}"
+  tags:
+    - www-user
 
 - name: "Write {{ www_tls_dir }}/{{ www_file_tls_key }}"
   ansible.builtin.copy:
@@ -98,6 +118,8 @@
     group: "{{ www_tls_dir_owner }}"
     mode: '0600'
   no_log: "{{ not display_diff_secrets }}"
+  tags:
+    - www-user
 
 - name: "Retrieve {{ www_secret_name_tls_pem }} from Secret Manager"
   ansible.builtin.command: "gcloud secrets versions access latest --secret {{ www_secret_name_tls_pem }}"
@@ -110,6 +132,8 @@
   no_log: "{{ not display_diff_secrets }}"
   environment:
     CLOUDSDK_CORE_PROJECT: "{{ lookup('ansible.builtin.env', 'CLOUDSDK_CORE_PROJECT') }}"
+  tags:
+    - www-user
 
 - name: "Write {{ www_tls_dir }}/{{ www_file_tls_pem }}"
   ansible.builtin.copy:
@@ -119,3 +143,5 @@
     group: "{{ www_tls_dir_owner }}"
     mode: '0600'
   no_log: "{{ not display_diff_secrets }}"
+  tags:
+    - www-user

@@ -7,15 +7,12 @@
   become_user: root
 
   vars:
-    key_dir: /etc/apt/trusted.gpg.d
-    # key_dir: /usr/share/keyrings
+    # mongodb_key_dir: /usr/share/keyrings ## why doesn't this work??
+    mongodb_key_dir: /etc/apt/trusted.gpg.d ## unsecure
     mongodb_version: '4.4'
     mongodb_key_url: "https://www.mongodb.org/static/pgp/server-{{ mongodb_version }}.asc"
-    mongodb_key_file: "{{ key_dir }}/mongodb-{{ mongodb_version }}.asc"
-    nodejs_version: node_16.x
-    nodejs_key_url: https://deb.nodesource.com/gpgkey/nodesource.gpg.key
-    nodejs_key_file: "{{ key_dir }}/nodesource.gpg.key"
-    mongodb_replica_set:
+    mongodb_key_file: "{{ mongodb_key_dir }}/mongodb-{{ mongodb_version }}.asc"
+    mongodb_replica_set: dev-eu4
 
   tasks:
 
@@ -39,10 +36,12 @@
         name:
           - apt-transport-https
       tags:
-        - deps
+        - mongodb
 
     - ansible.builtin.import_role:
         name: secure-disk
+      tags:
+        - mongodb
 
     - name: DEB architecture
       ansible.builtin.shell: dpkg --print-architecture
@@ -50,7 +49,6 @@
       changed_when: false
       tags:
         - mongodb
-        - nodejs
 
     - name: MongoDB | key
       ansible.builtin.get_url:
@@ -80,54 +78,120 @@
       tags:
         - mongodb
 
-    - name: MongoDB | start and enable service
-      ansible.builtin.service:
-        name: mongod.service
-        state: stopped
-        enabled: no
+    - name: MongoDB | Create /etc/systemd/system/mongod.service.d
+      ansible.builtin.file:
+        path: /etc/systemd/system/mongod.service.d
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
       tags:
         - mongodb
 
-    - name: NodeJS | key
-      ansible.builtin.get_url:
-        url: "{{ nodejs_key_url }}"
-        dest: "{{ nodejs_key_file }}"
+    - name: MongoDB | Update mongod.service configuration
+      ansible.builtin.copy:
+        src: systemd-override-mongod.conf
+        dest: /etc/systemd/system/mongod.service.d/override.conf
+        owner: root
+        group: root
+        mode: '0644'
+      notify:
+        - systemctl daemon-reload
+        - systemctl restart mongod
       tags:
-        - nodejs
+        - mongodb
 
-    - name: NodeJS | apt source
-      ansible.builtin.apt_repository:
-        repo: "deb [arch={{ deb_architecture.stdout }} signed-by={{ nodejs_key_file }}] https://deb.nodesource.com/node_16.x {{ ansible_distribution_release }} main"
-        state: present
-        filename: nodesource
+    - name: MongoDB | Set /etc/logrotate.d/mongod
+      ansible.builtin.copy:
+        src: logrotate-mongod.conf
+        dest: /etc/logrotate.d/mongod
+        owner: root
+        group: root
+        mode: '0644'
       tags:
-        - nodejs
+        - mongodb
+        - mongodb-logrotate
 
-    - name: NodeJS | install packages
-      ansible.builtin.apt:
-        update_cache: yes
-        name:
-          - nodejs
-      tags:
-        - nodejs
-
+    ## TODO: deprecate
     - ansible.builtin.import_role:
         name: www-user
       vars:
         www_tls_dir_owner: mongodb
 
-    # System check
+    ## TODO: parametrize
+    - name: MongoDB | Create /mnt/secure/mongodb
+      ansible.builtin.file:
+        path: /mnt/secure/mongodb
+        state: directory
+        owner: mongodb
+        group: mongodb
+        mode: '0700'
+      tags:
+        - mongodb
+
+    - name: MongoDB | Retrieve PEMKeyPassword password
+      ansible.builtin.command: "gcloud secrets versions access latest --secret PEMKeyPassword"
+      connection: local
+      become: no
+      run_once: true
+      delegate_to: localhost
+      register: pemkeypassword
+      no_log: "{{ not display_diff_secrets }}"
+      check_mode: no
+      environment:
+        CLOUDSDK_CORE_PROJECT: "{{ lookup('ansible.builtin.env', 'CLOUDSDK_CORE_PROJECT') }}"
+      tags:
+        - mongodb
+        - mongodb-config
+
+    - name: MongoDB | Set /etc/mongod.conf
+      template:
+        src: mongod_replicaset.conf.j2
+        dest: /etc/mongod.conf
+        owner: root
+        group: root
+        mode: '0644'
+      notify:
+        - systemctl restart mongod
+      no_log: "{{ not display_diff_secrets }}"
+      tags:
+        - mongodb
+        - mongodb-config
+
+    - name: MongoDB | start and enable service
+      ansible.builtin.service:
+        name: mongod.service
+        state: started
+        enabled: yes
+      tags:
+        - mongodb
+
+    - ansible.builtin.import_role:
+        name: nodejs
+
     - name: Check if a reboot is required
       ansible.builtin.shell: "[ -f /var/run/reboot-required ]"
       failed_when: false
       register: reboot_required
       changed_when: reboot_required.rc == 0
-      notify: Reboot instance
+      notify:
+        - reboot
       tags:
         - system
 
   handlers:
 
-    - name: Reboot instance
-      reboot:
+    - name: reboot
+      ansible.builtin.reboot:
         msg: Maintenance reboot initiated
+
+    - name: systemctl restart mongod
+      become: yes
+      ansible.builtin.service:
+        name: mongod
+        state: restarted
+
+    - name: systemctl daemon-reload
+      become: yes
+      ansible.builtin.systemd:
+        daemon_reload: yes

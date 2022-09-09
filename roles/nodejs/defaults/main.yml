@@ -1,0 +1,6 @@
+---
+nodejs_key_dir: /etc/apt/trusted.gpg.d ## unsecure
+# nodejs_key_dir: /usr/share/keyrings ## why doesn't this work??
+nodejs_version: node_16.x
+nodejs_key_url: https://deb.nodesource.com/gpgkey/nodesource.gpg.key
+nodejs_key_file: "{{ nodejs_key_dir }}/nodesource.gpg.key"

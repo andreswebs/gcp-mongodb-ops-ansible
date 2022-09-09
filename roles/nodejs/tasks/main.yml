@@ -1,0 +1,37 @@
+---
+- name: DEB architecture
+  ansible.builtin.shell: dpkg --print-architecture
+  register: deb_architecture
+  changed_when: false
+  tags:
+    - nodejs
+
+- name: Install dependencies
+  ansible.builtin.apt:
+    name:
+      - apt-transport-https
+  tags:
+    - nodejs
+
+- name: Download NodeJS signing key
+  ansible.builtin.get_url:
+    url: "{{ nodejs_key_url }}"
+    dest: "{{ nodejs_key_file }}"
+  tags:
+    - nodejs
+
+- name: Add apt source repository
+  ansible.builtin.apt_repository:
+    repo: "deb [arch={{ deb_architecture.stdout }} signed-by={{ nodejs_key_file }}] https://deb.nodesource.com/node_16.x {{ ansible_distribution_release }} main"
+    state: present
+    filename: nodesource
+  tags:
+    - nodejs
+
+- name: Install packages
+  ansible.builtin.apt:
+    update_cache: yes
+    name:
+      - nodejs
+  tags:
+    - nodejs
