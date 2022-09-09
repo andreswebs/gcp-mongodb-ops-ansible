@@ -48,7 +48,7 @@
     mode: '0600'
   no_log: "{{ not display_diff_secrets }}"
 
-- name: "Retrieve {{ file_tls_crt }} from Secret Manager"
+- name: "Retrieve {{ secret_name_tls_crt }} from Secret Manager"
   ansible.builtin.command: "gcloud secrets versions access latest --secret {{ secret_name_tls_crt }}"
   connection: local
   become: no
@@ -81,7 +81,7 @@
   environment:
     CLOUDSDK_CORE_PROJECT: "{{ lookup('ansible.builtin.env', 'CLOUDSDK_CORE_PROJECT') }}"
 
-- name: "Write {{ file_tls_key }}"
+- name: "Write {{ tls_dir }}/{{ file_tls_key }}"
   ansible.builtin.copy:
     dest: "{{ tls_dir }}/{{ file_tls_key }}"
     content: "{{ www_tls_key.stdout }}"
