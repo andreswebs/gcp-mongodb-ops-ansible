@@ -13,6 +13,9 @@
     mongodb_key_url: "https://www.mongodb.org/static/pgp/server-{{ mongodb_version }}.asc"
     mongodb_key_file: "{{ mongodb_key_dir }}/mongodb-{{ mongodb_version }}.asc"
     mongodb_replica_set: dev-eu4
+    mongodb_secret_name_tls_keypassword: PEMKeyPassword
+    mongodb_storage_path: /mnt/secure/mongodb
+    mongodb_tls_dir: /home/www/tls
 
   tasks:
 
@@ -129,13 +132,13 @@
       tags:
         - mongodb
 
-    - name: MongoDB | Retrieve PEMKeyPassword password
-      ansible.builtin.command: "gcloud secrets versions access latest --secret PEMKeyPassword"
+    - name: "MongoDB | Retrieve secret {{ mongodb_secret_name_tls_keypassword }}"
+      ansible.builtin.command: "gcloud secrets versions access latest --secret {{ mongodb_secret_name_tls_keypassword }}"
       connection: local
       become: no
       run_once: true
       delegate_to: localhost
-      register: pemkeypassword
+      register: mongodb_tls_keypassword
       no_log: "{{ not display_diff_secrets }}"
       check_mode: no
       environment:

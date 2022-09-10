@@ -1,5 +1,5 @@
 storage:
-  dbPath: /mnt/secure/mongodb
+  dbPath: {{ mongodb_storage_path }}
   journal:
     enabled: true
   engine: wiredTiger
@@ -13,9 +13,9 @@ net:
   bindIp: 0.0.0.0
   tls:
     mode: requireTLS
-    certificateKeyFile: /home/www/tls/wildcard.planhat.dev.pem
-    certificateKeyFilePassword: {{ pemkeypassword.stdout }}
-    CAFile: /home/www/tls/ca.crt
+    certificateKeyFile: {{ mongodb_tls_dir }}/wildcard.planhat.dev.pem
+    certificateKeyFilePassword: {{ mongodb_tls_keypassword.stdout }}
+    CAFile: {{ mongodb_tls_dir }}/ca.crt
 processManagement:
   fork: false
 security:
