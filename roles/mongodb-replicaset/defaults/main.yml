@@ -1,0 +1,20 @@
+---
+# mongodb_key_dir: /usr/share/keyrings ## why doesn't this work??
+mongodb_key_dir: /etc/apt/trusted.gpg.d ## unsecure
+mongodb_version: '4.4'
+mongodb_key_url: "https://www.mongodb.org/static/pgp/server-{{ mongodb_version }}.asc"
+mongodb_key_file: "{{ mongodb_key_dir }}/mongodb-{{ mongodb_version }}.asc"
+
+mongodb_replica_set: rs0
+mongodb_secret_name_tls_keypassword: mongodb_tls_key_password
+mongodb_storage_path: /var/lib/mongodb
+
+mongodb_tls_dir: /etc/mongodb-tls
+mongodb_file_ca_crt: ca.crt
+mongodb_file_tls_crt: tls.crt
+mongodb_file_tls_key: tls.key
+mongodb_file_tls_pem: tls.pem
+mongodb_secret_name_ca_crt: mongodb_ca_crt
+mongodb_secret_name_tls_crt: mongodb_tls_crt
+mongodb_secret_name_tls_key: mongodb_tls_key
+mongodb_secret_name_tls_pem: mongodb_tls_pem

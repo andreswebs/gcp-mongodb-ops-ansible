@@ -1,0 +1,11 @@
+---
+- name: systemctl restart mongod
+  become: yes
+  ansible.builtin.service:
+    name: mongod
+    state: restarted
+
+- name: systemctl daemon-reload
+  become: yes
+  ansible.builtin.systemd:
+    daemon_reload: yes

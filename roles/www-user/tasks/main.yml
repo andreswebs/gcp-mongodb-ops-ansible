@@ -2,12 +2,15 @@
 - name: "Create {{ www_user }} group"
   ansible.builtin.group:
     name: "{{ www_user }}"
-    state: present
+    # state: present
+    state: absent ## DEPRECATING: set absent after removing user
   tags:
     - www-user
 
 - name: "Create {{ www_user }} user"
   ansible.builtin.user:
+    state: absent
+    remove: yes
     name: "{{ www_user }}"
     group: "{{ www_user }}"
     groups: sudo
@@ -18,6 +21,7 @@
 
 - name: "Allow {{ www_user }} passwordless sudo"
   ansible.builtin.blockinfile:
+    state: absent
     path: /etc/sudoers
     block: |
       {{ www_user }} ALL=(ALL) NOPASSWD: ALL
@@ -25,123 +29,123 @@
   tags:
     - www-user
 
-- name: "Create {{ www_tls_dir }}"
-  ansible.builtin.file:
-    path: "{{ www_tls_dir }}"
-    state: directory
-    owner: "{{ www_tls_dir_owner }}"
-    group: "{{ www_tls_dir_owner }}"
-    mode: '0700'
-  tags:
-    - www-user
+# - name: "Create {{ www_tls_dir }}"
+#   ansible.builtin.file:
+#     path: "{{ www_tls_dir }}"
+#     state: directory
+#     owner: "{{ www_tls_dir_owner }}"
+#     group: "{{ www_tls_dir_owner }}"
+#     mode: '0700'
+#   tags:
+#     - www-user
 
-- name: "Ensure {{ www_tls_dir_owner }} has read/execute permissions on {{ www_tls_dir }}/.."
-  ansible.posix.acl:
-    state: present
-    default: yes
-    path: "{{ www_tls_dir }}/.."
-    etype: user
-    entity: "{{ www_tls_dir_owner }}"
-    permissions: rX
-  tags:
-    - www-user
+# - name: "Ensure {{ www_tls_dir_owner }} has read/execute permissions on {{ www_tls_dir }}/.."
+#   ansible.posix.acl:
+#     state: present
+#     default: yes
+#     path: "{{ www_tls_dir }}/.."
+#     etype: user
+#     entity: "{{ www_tls_dir_owner }}"
+#     permissions: rX
+#   tags:
+#     - www-user
 
-- name: "Retrieve {{ www_secret_name_ca_crt }} from Secret Manager"
-  ansible.builtin.command: "gcloud secrets versions access latest --secret ca_crt"
-  connection: local
-  become: no
-  run_once: true
-  delegate_to: localhost
-  register: www_ca_crt
-  check_mode: false
-  no_log: "{{ not display_diff_secrets }}"
-  environment:
-    CLOUDSDK_CORE_PROJECT: "{{ lookup('ansible.builtin.env', 'CLOUDSDK_CORE_PROJECT') }}"
-  tags:
-    - www-user
+# - name: "Retrieve {{ www_secret_name_ca_crt }} from Secret Manager"
+#   ansible.builtin.command: "gcloud secrets versions access latest --secret ca_crt"
+#   connection: local
+#   become: no
+#   run_once: true
+#   delegate_to: localhost
+#   register: www_ca_crt
+#   check_mode: false
+#   no_log: "{{ not display_diff_secrets }}"
+#   environment:
+#     CLOUDSDK_CORE_PROJECT: "{{ lookup('ansible.builtin.env', 'CLOUDSDK_CORE_PROJECT') }}"
+#   tags:
+#     - www-user
 
-- name: "Write {{ www_tls_dir }}/{{ www_file_ca_crt }}"
-  copy:
-    dest: "{{ www_tls_dir }}/{{ www_file_ca_crt }}"
-    content: "{{ www_ca_crt.stdout }}"
-    owner: "{{ www_tls_dir_owner }}"
-    group: "{{ www_tls_dir_owner }}"
-    mode: '0600'
-  no_log: "{{ not display_diff_secrets }}"
-  tags:
-    - www-user
+# - name: "Write {{ www_tls_dir }}/{{ www_file_ca_crt }}"
+#   copy:
+#     dest: "{{ www_tls_dir }}/{{ www_file_ca_crt }}"
+#     content: "{{ www_ca_crt.stdout }}"
+#     owner: "{{ www_tls_dir_owner }}"
+#     group: "{{ www_tls_dir_owner }}"
+#     mode: '0600'
+#   no_log: "{{ not display_diff_secrets }}"
+#   tags:
+#     - www-user
 
-- name: "Retrieve {{ www_secret_name_tls_crt }} from Secret Manager"
-  ansible.builtin.command: "gcloud secrets versions access latest --secret {{ www_secret_name_tls_crt }}"
-  connection: local
-  become: no
-  run_once: true
-  delegate_to: localhost
-  register: www_tls_crt
-  check_mode: no
-  no_log: "{{ not display_diff_secrets }}"
-  environment:
-    CLOUDSDK_CORE_PROJECT: "{{ lookup('ansible.builtin.env', 'CLOUDSDK_CORE_PROJECT') }}"
-  tags:
-    - www-user
+# - name: "Retrieve {{ www_secret_name_tls_crt }} from Secret Manager"
+#   ansible.builtin.command: "gcloud secrets versions access latest --secret {{ www_secret_name_tls_crt }}"
+#   connection: local
+#   become: no
+#   run_once: true
+#   delegate_to: localhost
+#   register: www_tls_crt
+#   check_mode: no
+#   no_log: "{{ not display_diff_secrets }}"
+#   environment:
+#     CLOUDSDK_CORE_PROJECT: "{{ lookup('ansible.builtin.env', 'CLOUDSDK_CORE_PROJECT') }}"
+#   tags:
+#     - www-user
 
-- name: "Write {{ www_tls_dir }}/{{ www_file_tls_crt }}"
-  ansible.builtin.copy:
-    dest: "{{ www_tls_dir }}/{{ www_file_tls_crt }}"
-    content: "{{ www_tls_crt.stdout }}"
-    owner: "{{ www_tls_dir_owner }}"
-    group: "{{ www_tls_dir_owner }}"
-    mode: '0600'
-  no_log: "{{ not display_diff_secrets }}"
-  tags:
-    - www-user
+# - name: "Write {{ www_tls_dir }}/{{ www_file_tls_crt }}"
+#   ansible.builtin.copy:
+#     dest: "{{ www_tls_dir }}/{{ www_file_tls_crt }}"
+#     content: "{{ www_tls_crt.stdout }}"
+#     owner: "{{ www_tls_dir_owner }}"
+#     group: "{{ www_tls_dir_owner }}"
+#     mode: '0600'
+#   no_log: "{{ not display_diff_secrets }}"
+#   tags:
+#     - www-user
 
-- name: "Retrieve {{ www_secret_name_tls_key }} from Secret Manager"
-  ansible.builtin.command: "gcloud secrets versions access latest --secret {{ www_secret_name_tls_key }}"
-  connection: local
-  become: no
-  run_once: true
-  delegate_to: localhost
-  register: www_tls_key
-  check_mode: no
-  no_log: "{{ not display_diff_secrets }}"
-  environment:
-    CLOUDSDK_CORE_PROJECT: "{{ lookup('ansible.builtin.env', 'CLOUDSDK_CORE_PROJECT') }}"
-  tags:
-    - www-user
+# - name: "Retrieve {{ www_secret_name_tls_key }} from Secret Manager"
+#   ansible.builtin.command: "gcloud secrets versions access latest --secret {{ www_secret_name_tls_key }}"
+#   connection: local
+#   become: no
+#   run_once: true
+#   delegate_to: localhost
+#   register: www_tls_key
+#   check_mode: no
+#   no_log: "{{ not display_diff_secrets }}"
+#   environment:
+#     CLOUDSDK_CORE_PROJECT: "{{ lookup('ansible.builtin.env', 'CLOUDSDK_CORE_PROJECT') }}"
+#   tags:
+#     - www-user
 
-- name: "Write {{ www_tls_dir }}/{{ www_file_tls_key }}"
-  ansible.builtin.copy:
-    dest: "{{ www_tls_dir }}/{{ www_file_tls_key }}"
-    content: "{{ www_tls_key.stdout }}"
-    owner: "{{ www_tls_dir_owner }}"
-    group: "{{ www_tls_dir_owner }}"
-    mode: '0600'
-  no_log: "{{ not display_diff_secrets }}"
-  tags:
-    - www-user
+# - name: "Write {{ www_tls_dir }}/{{ www_file_tls_key }}"
+#   ansible.builtin.copy:
+#     dest: "{{ www_tls_dir }}/{{ www_file_tls_key }}"
+#     content: "{{ www_tls_key.stdout }}"
+#     owner: "{{ www_tls_dir_owner }}"
+#     group: "{{ www_tls_dir_owner }}"
+#     mode: '0600'
+#   no_log: "{{ not display_diff_secrets }}"
+#   tags:
+#     - www-user
 
-- name: "Retrieve {{ www_secret_name_tls_pem }} from Secret Manager"
-  ansible.builtin.command: "gcloud secrets versions access latest --secret {{ www_secret_name_tls_pem }}"
-  connection: local
-  become: no
-  run_once: true
-  delegate_to: localhost
-  register: www_tls_pem
-  check_mode: no
-  no_log: "{{ not display_diff_secrets }}"
-  environment:
-    CLOUDSDK_CORE_PROJECT: "{{ lookup('ansible.builtin.env', 'CLOUDSDK_CORE_PROJECT') }}"
-  tags:
-    - www-user
+# - name: "Retrieve {{ www_secret_name_tls_pem }} from Secret Manager"
+#   ansible.builtin.command: "gcloud secrets versions access latest --secret {{ www_secret_name_tls_pem }}"
+#   connection: local
+#   become: no
+#   run_once: true
+#   delegate_to: localhost
+#   register: www_tls_pem
+#   check_mode: no
+#   no_log: "{{ not display_diff_secrets }}"
+#   environment:
+#     CLOUDSDK_CORE_PROJECT: "{{ lookup('ansible.builtin.env', 'CLOUDSDK_CORE_PROJECT') }}"
+#   tags:
+#     - www-user
 
-- name: "Write {{ www_tls_dir }}/{{ www_file_tls_pem }}"
-  ansible.builtin.copy:
-    dest: "{{ www_tls_dir }}/{{ www_file_tls_pem }}"
-    content: "{{ www_tls_pem.stdout }}"
-    owner: "{{ www_tls_dir_owner }}"
-    group: "{{ www_tls_dir_owner }}"
-    mode: '0600'
-  no_log: "{{ not display_diff_secrets }}"
-  tags:
-    - www-user
+# - name: "Write {{ www_tls_dir }}/{{ www_file_tls_pem }}"
+#   ansible.builtin.copy:
+#     dest: "{{ www_tls_dir }}/{{ www_file_tls_pem }}"
+#     content: "{{ www_tls_pem.stdout }}"
+#     owner: "{{ www_tls_dir_owner }}"
+#     group: "{{ www_tls_dir_owner }}"
+#     mode: '0600'
+#   no_log: "{{ not display_diff_secrets }}"
+#   tags:
+#     - www-user

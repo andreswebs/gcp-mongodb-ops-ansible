@@ -7,15 +7,7 @@
   become_user: root
 
   vars:
-    # mongodb_key_dir: /usr/share/keyrings ## why doesn't this work??
-    mongodb_key_dir: /etc/apt/trusted.gpg.d ## unsecure
-    mongodb_version: '4.4'
-    mongodb_key_url: "https://www.mongodb.org/static/pgp/server-{{ mongodb_version }}.asc"
-    mongodb_key_file: "{{ mongodb_key_dir }}/mongodb-{{ mongodb_version }}.asc"
-    mongodb_replica_set: dev-eu4
-    mongodb_secret_name_tls_keypassword: PEMKeyPassword
-    mongodb_storage_path: /mnt/secure/mongodb
-    mongodb_tls_dir: /home/www/tls
+    data_disk_path: /mnt/secure
 
   tasks:
 
@@ -34,140 +26,31 @@
       tags:
         - system
 
-    - name: Install dependencies
-      ansible.builtin.apt:
-        name:
-          - apt-transport-https
-      tags:
-        - mongodb
-
     - ansible.builtin.import_role:
         name: secure-disk
-      tags:
-        - mongodb
-
-    - name: DEB architecture
-      ansible.builtin.shell: dpkg --print-architecture
-      register: deb_architecture
-      changed_when: false
-      tags:
-        - mongodb
-
-    - name: MongoDB | key
-      ansible.builtin.get_url:
-        url: "{{ mongodb_key_url }}"
-        dest: "{{ mongodb_key_file }}"
-      tags:
-        - mongodb
-
-    - name: MongoDB | apt source
-      ansible.builtin.apt_repository:
-        repo: "deb [arch={{ deb_architecture.stdout }} signed-by={{ mongodb_key_file }}] https://repo.mongodb.org/apt/ubuntu {{ ansible_distribution_release }}/mongodb-org/{{ mongodb_version }} multiverse"
-        state: present
-        filename: "mongodb-org-{{ mongodb_version }}"
-      tags:
-        - mongodb
-
-    - name: MongoDB | install packages
-      ansible.builtin.apt:
-        update_cache: yes
-        name:
-          - mongodb-org
-          - mongodb-org-server
-          - mongodb-org-shell
-          - mongodb-org-mongos
-          - mongodb-org-tools
-          - python3-pymongo
-      tags:
-        - mongodb
-
-    - name: MongoDB | Create /etc/systemd/system/mongod.service.d
-      ansible.builtin.file:
-        path: /etc/systemd/system/mongod.service.d
-        state: directory
-        owner: root
-        group: root
-        mode: '0755'
-      tags:
-        - mongodb
-
-    - name: MongoDB | Update mongod.service configuration
-      ansible.builtin.copy:
-        src: systemd-override-mongod.conf
-        dest: /etc/systemd/system/mongod.service.d/override.conf
-        owner: root
-        group: root
-        mode: '0644'
-      notify:
-        - systemctl daemon-reload
-        - systemctl restart mongod
-      tags:
-        - mongodb
-
-    - name: MongoDB | Set /etc/logrotate.d/mongod
-      ansible.builtin.copy:
-        src: logrotate-mongod.conf
-        dest: /etc/logrotate.d/mongod
-        owner: root
-        group: root
-        mode: '0644'
-      tags:
-        - mongodb
-        - mongodb-logrotate
-
-    ## TODO: deprecate
-    - ansible.builtin.import_role:
-        name: www-user
       vars:
-        www_tls_dir_owner: mongodb
-
-    ## TODO: parametrize
-    - name: MongoDB | Create /mnt/secure/mongodb
-      ansible.builtin.file:
-        path: /mnt/secure/mongodb
-        state: directory
-        owner: mongodb
-        group: mongodb
-        mode: '0700'
+        secure_disk_mount_path: "{{ data_disk_path }}"
       tags:
         - mongodb
 
-    - name: "MongoDB | Retrieve secret {{ mongodb_secret_name_tls_keypassword }}"
-      ansible.builtin.command: "gcloud secrets versions access latest --secret {{ mongodb_secret_name_tls_keypassword }}"
-      connection: local
-      become: no
-      run_once: true
-      delegate_to: localhost
-      register: mongodb_tls_keypassword
-      no_log: "{{ not display_diff_secrets }}"
-      check_mode: no
-      environment:
-        CLOUDSDK_CORE_PROJECT: "{{ lookup('ansible.builtin.env', 'CLOUDSDK_CORE_PROJECT') }}"
-      tags:
-        - mongodb
-        - mongodb-config
+    # # DEPRECATED:
+    # - ansible.builtin.import_role:
+    #     name: www-user
 
-    - name: MongoDB | Set /etc/mongod.conf
-      template:
-        src: mongod_replicaset.conf.j2
-        dest: /etc/mongod.conf
-        owner: root
-        group: root
-        mode: '0644'
-      notify:
-        - systemctl restart mongod
-      no_log: "{{ not display_diff_secrets }}"
-      tags:
-        - mongodb
-        - mongodb-config
-
-    - name: MongoDB | start and enable service
-      ansible.builtin.service:
-        name: mongod.service
-        state: started
-        enabled: yes
-      tags:
-        - mongodb
+    - ansible.builtin.import_role:
+        name: mongodb-replicaset
+      vars:
+        mongodb_storage_path: "{{ data_disk_path }}/mongodb"
+        mongodb_replica_set: dev-eu4
+        mongodb_secret_name_tls_keypassword: PEMKeyPassword
+        mongodb_file_ca_crt: ca.crt
+        mongodb_file_tls_crt: wildcard.planhat.dev.crt
+        mongodb_file_tls_key: wildcard.planhat.dev.key
+        mongodb_file_tls_pem: wildcard.planhat.dev.pem
+        mongodb_secret_name_ca_crt: ca_crt
+        mongodb_secret_name_tls_crt: wildcard_planhat_dev_crt
+        mongodb_secret_name_tls_key: wildcard_planhat_dev_key
+        mongodb_secret_name_tls_pem: wildcard_planhat_dev_pem
 
     - ansible.builtin.import_role:
         name: nodejs
@@ -188,13 +71,3 @@
       ansible.builtin.reboot:
         msg: Maintenance reboot initiated
 
-    - name: systemctl restart mongod
-      become: yes
-      ansible.builtin.service:
-        name: mongod
-        state: restarted
-
-    - name: systemctl daemon-reload
-      become: yes
-      ansible.builtin.systemd:
-        daemon_reload: yes
