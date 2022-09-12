@@ -1,4 +1,14 @@
 ---
+- name: "Ensure {{ mongodb_storage_path }} exists"
+  ansible.builtin.file:
+    path: "{{ mongodb_storage_path }}"
+    state: directory
+    owner: mongodb
+    group: mongodb
+  tags:
+    - mongodb
+    - mongodb-storage
+
 - name: Install dependencies
   ansible.builtin.apt:
     name:
@@ -50,6 +60,7 @@
     mode: '0755'
   tags:
     - mongodb
+    - mongodb-service-config
 
 - name: Update mongod.service configuration
   ansible.builtin.copy:
@@ -63,6 +74,7 @@
     - systemctl restart mongod
   tags:
     - mongodb
+    - mongodb-service-config
 
 - name: Set /etc/logrotate.d/mongod
   ansible.builtin.copy:
@@ -75,136 +87,7 @@
     - mongodb
     - mongodb-logrotate
 
-- name: "Create {{ mongodb_tls_dir }}"
-  ansible.builtin.file:
-    path: "{{ mongodb_tls_dir }}"
-    state: directory
-    owner: mongodb
-    group: mongodb
-    mode: '0700'
-  tags:
-    - mongodb
-    - mongodb-tls
-
-- name: "Ensure mongodb user has read/execute permissions on {{ mongodb_tls_dir }}/.."
-  ansible.posix.acl:
-    state: present
-    default: yes
-    path: "{{ mongodb_tls_dir }}/.."
-    etype: user
-    entity: mongodb
-    permissions: rX
-  tags:
-    - mongodb
-    - mongodb-tls
-
-- name: "Retrieve {{ mongodb_secret_name_ca_crt }} from Secret Manager"
-  ansible.builtin.command: "gcloud secrets versions access latest --secret ca_crt"
-  connection: local
-  become: no
-  run_once: true
-  delegate_to: localhost
-  register: mongodb_ca_crt
-  check_mode: false
-  no_log: "{{ not display_diff_secrets }}"
-  environment:
-    CLOUDSDK_CORE_PROJECT: "{{ lookup('ansible.builtin.env', 'CLOUDSDK_CORE_PROJECT') }}"
-  tags:
-    - mongodb
-    - mongodb-tls
-
-- name: "Write {{ mongodb_tls_dir }}/{{ mongodb_file_ca_crt }}"
-  copy:
-    dest: "{{ mongodb_tls_dir }}/{{ mongodb_file_ca_crt }}"
-    content: "{{ mongodb_ca_crt.stdout }}"
-    owner: mongodb
-    group: mongodb
-    mode: '0600'
-  no_log: "{{ not display_diff_secrets }}"
-  tags:
-    - mongodb
-    - mongodb-tls
-
-- name: "Retrieve {{ mongodb_secret_name_tls_crt }} from Secret Manager"
-  ansible.builtin.command: "gcloud secrets versions access latest --secret {{ mongodb_secret_name_tls_crt }}"
-  connection: local
-  become: no
-  run_once: true
-  delegate_to: localhost
-  register: mongodb_tls_crt
-  check_mode: no
-  no_log: "{{ not display_diff_secrets }}"
-  environment:
-    CLOUDSDK_CORE_PROJECT: "{{ lookup('ansible.builtin.env', 'CLOUDSDK_CORE_PROJECT') }}"
-  tags:
-    - mongodb
-    - mongodb-tls
-
-- name: "Write {{ mongodb_tls_dir }}/{{ mongodb_file_tls_crt }}"
-  ansible.builtin.copy:
-    dest: "{{ mongodb_tls_dir }}/{{ mongodb_file_tls_crt }}"
-    content: "{{ mongodb_tls_crt.stdout }}"
-    owner: mongodb
-    group: mongodb
-    mode: '0600'
-  no_log: "{{ not display_diff_secrets }}"
-  tags:
-    - mongodb
-    - mongodb-tls
-
-- name: "Retrieve {{ mongodb_secret_name_tls_key }} from Secret Manager"
-  ansible.builtin.command: "gcloud secrets versions access latest --secret {{ mongodb_secret_name_tls_key }}"
-  connection: local
-  become: no
-  run_once: true
-  delegate_to: localhost
-  register: mongodb_tls_key
-  check_mode: no
-  no_log: "{{ not display_diff_secrets }}"
-  environment:
-    CLOUDSDK_CORE_PROJECT: "{{ lookup('ansible.builtin.env', 'CLOUDSDK_CORE_PROJECT') }}"
-  tags:
-    - mongodb
-    - mongodb-tls
-
-- name: "Write {{ mongodb_tls_dir }}/{{ mongodb_file_tls_key }}"
-  ansible.builtin.copy:
-    dest: "{{ mongodb_tls_dir }}/{{ mongodb_file_tls_key }}"
-    content: "{{ mongodb_tls_key.stdout }}"
-    owner: mongodb
-    group: mongodb
-    mode: '0600'
-  no_log: "{{ not display_diff_secrets }}"
-  tags:
-    - mongodb
-    - mongodb-tls
-
-- name: "Retrieve {{ mongodb_secret_name_tls_pem }} from Secret Manager"
-  ansible.builtin.command: "gcloud secrets versions access latest --secret {{ mongodb_secret_name_tls_pem }}"
-  connection: local
-  become: no
-  run_once: true
-  delegate_to: localhost
-  register: mongodb_tls_pem
-  check_mode: no
-  no_log: "{{ not display_diff_secrets }}"
-  environment:
-    CLOUDSDK_CORE_PROJECT: "{{ lookup('ansible.builtin.env', 'CLOUDSDK_CORE_PROJECT') }}"
-  tags:
-    - mongodb
-    - mongodb-tls
-
-- name: "Write {{ mongodb_tls_dir }}/{{ mongodb_file_tls_pem }}"
-  ansible.builtin.copy:
-    dest: "{{ mongodb_tls_dir }}/{{ mongodb_file_tls_pem }}"
-    content: "{{ mongodb_tls_pem.stdout }}"
-    owner: mongodb
-    group: mongodb
-    mode: '0600'
-  no_log: "{{ not display_diff_secrets }}"
-  tags:
-    - mongodb
-    - mongodb-tls
+- ansible.builtin.import_tasks: tls.yml
 
 - name: "Retrieve secret {{ mongodb_secret_name_tls_keypassword }}"
   ansible.builtin.command: "gcloud secrets versions access latest --secret {{ mongodb_secret_name_tls_keypassword }}"
@@ -242,3 +125,5 @@
     enabled: yes
   tags:
     - mongodb
+    - mongodb-service
+    - mongodb-service-config

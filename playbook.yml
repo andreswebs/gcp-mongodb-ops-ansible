@@ -41,7 +41,7 @@
         name: mongodb-replicaset
       vars:
         mongodb_storage_path: "{{ data_disk_path }}/mongodb"
-        mongodb_replica_set: dev-eu4
+        mongodb_replica_set: rseu
         mongodb_secret_name_tls_keypassword: PEMKeyPassword
         mongodb_file_ca_crt: ca.crt
         mongodb_file_tls_crt: wildcard.planhat.dev.crt
