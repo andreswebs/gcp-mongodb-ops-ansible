@@ -26,6 +26,24 @@
       tags:
         - system
 
+    - name: Install / update google agents
+      ansible.builtin.apt:
+        name:
+          - google-compute-engine
+          - google-compute-engine-oslogin
+          - google-guest-agent
+          - google-osconfig-agent
+      tags:
+        - system
+
+    - ansible.builtin.import_role:
+        name: googlecloudplatform.google_cloud_ops_agents
+      vars:
+        agent_type: ops-agent
+        main_config_file: ops-agent.config.yml
+      tags:
+        - google-ops-agent
+
     - ansible.builtin.import_role:
         name: secure-disk
       vars:
