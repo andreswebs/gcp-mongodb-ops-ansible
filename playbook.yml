@@ -2,7 +2,9 @@
 ---
 - name: MongoDB
 
-  hosts: all
+  hosts:
+    - vm_tag_db
+
   become: yes
   become_user: root
 
@@ -20,6 +22,9 @@
     mongodb_secret_name_tls_crt: wildcard_planhat_dev_crt
     mongodb_secret_name_tls_key: wildcard_planhat_dev_key
     mongodb_secret_name_tls_pem: wildcard_planhat_dev_pem
+
+    mongodb_monitor_username: mongoMonitor
+    mongodb_secret_name_monitor_password: mongodb_monitor_password
 
   tasks:
 
@@ -48,10 +53,6 @@
       tags:
         - system
 
-    ## TODO:
-    # Set up GCP ops agent config
-    # https://cloud.google.com/stackdriver/docs/solutions/agents/ops-agent/third-party/mongodb
-
     - ansible.builtin.import_role:
         name: googlecloudplatform.google_cloud_ops_agents
       vars:
@@ -60,10 +61,39 @@
       tags:
         - google-ops-agent
 
+    - name: "Retrieve secret {{ mongodb_secret_name_monitor_password }}"
+      ansible.builtin.command: "gcloud secrets versions access latest --secret {{ mongodb_secret_name_monitor_password }}"
+      connection: local
+      delegate_to: localhost
+      become: no
+      run_once: true
+      check_mode: false
+      changed_when: false
+      # no_log: not display_diff_secrets
+      register: mongodb_monitor_password
+      environment:
+        CLOUDSDK_CORE_PROJECT: "{{ lookup('ansible.builtin.env', 'CLOUDSDK_CORE_PROJECT') }}"
+      tags:
+        - google-ops-agent
+        - google-ops-agent-config
+
+    - name: Set /etc/google-cloud-ops-agent/config.yaml
+      ansible.builtin.template:
+        src: ops-agent.config.yml.j2
+        dest: /etc/google-cloud-ops-agent/config.yaml
+        owner: root
+        group: root
+        mode: '0644'
+      notify:
+        - systemctl restart google-cloud-ops-agent
+      tags:
+        - google-ops-agent
+        - google-ops-agent-config
+
     - ansible.builtin.import_role:
-        name: secure-disk
+        name: extra-disk
       vars:
-        secure_disk_mount_path: "{{ data_disk_path }}"
+        extra_disk_mount_path: "{{ data_disk_path }}"
       tags:
         - mongodb
 
@@ -93,3 +123,4 @@
       ansible.builtin.reboot:
         msg: Maintenance reboot initiated
 
+    - ansible.builtin.import_tasks: handlers/main.yml

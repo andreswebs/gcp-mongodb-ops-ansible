@@ -1,0 +1,3 @@
+# extra_disk_fstype: xfs
+extra_disk_fstype: ext4
+extra_disk_mount_path: /mnt/secure

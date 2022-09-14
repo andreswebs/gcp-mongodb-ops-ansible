@@ -14,7 +14,7 @@ net:
   tls:
     mode: requireTLS
     certificateKeyFile: {{ mongodb_tls_dir }}/{{ mongodb_file_tls_pem }}
-    certificateKeyFilePassword: {{ mongodb_tls_keypassword.stdout }}
+    certificateKeyFilePassword: {{ mongodb_tls_key_password.stdout }}
     CAFile: {{ mongodb_tls_dir }}/{{ mongodb_file_ca_crt }}
 processManagement:
   fork: false

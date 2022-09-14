@@ -6,7 +6,6 @@ mongodb_key_url: "https://www.mongodb.org/static/pgp/server-{{ mongodb_version }
 mongodb_key_file: "{{ mongodb_key_dir }}/mongodb-{{ mongodb_version }}.asc"
 
 mongodb_replica_set_name: rs-default
-mongodb_secret_name_tls_keypassword: mongodb_tls_key_password
 mongodb_storage_path: /var/lib/mongodb
 mongodb_log_path: /var/log/mongodb/mongod.log
 
@@ -17,5 +16,12 @@ mongodb_file_tls_key: tls.key
 mongodb_file_tls_pem: tls.pem
 mongodb_secret_name_ca_crt: mongodb_ca_crt
 mongodb_secret_name_tls_crt: mongodb_tls_crt
-mongodb_secret_name_tls_key: mongodb_tls_key
 mongodb_secret_name_tls_pem: mongodb_tls_pem
+mongodb_secret_name_tls_key: mongodb_tls_key
+mongodb_secret_name_tls_key_password: mongodb_tls_key_password
+
+mongodb_monitor_username: mongomonitor
+mongodb_secret_name_monitor_password: mongodb_monitor_password
+
+mongodb_admin_username: mongoadmin
+mongodb_secret_name_admin_password: mongodb_admin_password

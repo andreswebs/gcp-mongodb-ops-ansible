@@ -6,4 +6,4 @@ logging:
   service:
     pipelines:
       mongo:
-        receivers: [mongodb]
+        receivers: [ mongodb ]
