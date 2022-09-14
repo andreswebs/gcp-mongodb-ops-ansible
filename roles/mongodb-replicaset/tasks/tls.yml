@@ -25,12 +25,13 @@
 - name: "Retrieve {{ mongodb_secret_name_ca_crt }} from Secret Manager"
   ansible.builtin.command: "gcloud secrets versions access latest --secret ca_crt"
   connection: local
+  delegate_to: localhost
   become: no
   run_once: true
-  delegate_to: localhost
-  register: mongodb_ca_crt
   check_mode: false
+  changed_when: false
   no_log: "{{ not display_diff_secrets }}"
+  register: mongodb_ca_crt
   environment:
     CLOUDSDK_CORE_PROJECT: "{{ lookup('ansible.builtin.env', 'CLOUDSDK_CORE_PROJECT') }}"
   tags:
@@ -52,12 +53,13 @@
 - name: "Retrieve {{ mongodb_secret_name_tls_crt }} from Secret Manager"
   ansible.builtin.command: "gcloud secrets versions access latest --secret {{ mongodb_secret_name_tls_crt }}"
   connection: local
+  delegate_to: localhost
   become: no
   run_once: true
-  delegate_to: localhost
-  register: mongodb_tls_crt
-  check_mode: no
+  check_mode: false
+  changed_when: false
   no_log: "{{ not display_diff_secrets }}"
+  register: mongodb_tls_crt
   environment:
     CLOUDSDK_CORE_PROJECT: "{{ lookup('ansible.builtin.env', 'CLOUDSDK_CORE_PROJECT') }}"
   tags:
@@ -79,12 +81,13 @@
 - name: "Retrieve {{ mongodb_secret_name_tls_key }} from Secret Manager"
   ansible.builtin.command: "gcloud secrets versions access latest --secret {{ mongodb_secret_name_tls_key }}"
   connection: local
+  delegate_to: localhost
   become: no
   run_once: true
-  delegate_to: localhost
-  register: mongodb_tls_key
-  check_mode: no
+  check_mode: false
+  changed_when: false
   no_log: "{{ not display_diff_secrets }}"
+  register: mongodb_tls_key
   environment:
     CLOUDSDK_CORE_PROJECT: "{{ lookup('ansible.builtin.env', 'CLOUDSDK_CORE_PROJECT') }}"
   tags:
@@ -106,12 +109,13 @@
 - name: "Retrieve {{ mongodb_secret_name_tls_pem }} from Secret Manager"
   ansible.builtin.command: "gcloud secrets versions access latest --secret {{ mongodb_secret_name_tls_pem }}"
   connection: local
+  delegate_to: localhost
   become: no
   run_once: true
-  delegate_to: localhost
-  register: mongodb_tls_pem
-  check_mode: no
+  check_mode: false
+  changed_when: false
   no_log: "{{ not display_diff_secrets }}"
+  register: mongodb_tls_pem
   environment:
     CLOUDSDK_CORE_PROJECT: "{{ lookup('ansible.builtin.env', 'CLOUDSDK_CORE_PROJECT') }}"
   tags:

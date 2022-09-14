@@ -8,6 +8,18 @@
 
   vars:
     data_disk_path: /mnt/secure
+    mongodb_storage_path: "{{ data_disk_path }}/mongodb"
+    mongodb_replica_set_name: rseu
+    mongodb_tls_dir: /etc/mongodb-tls
+    mongodb_file_ca_crt: ca.crt
+    mongodb_file_tls_crt: wildcard.planhat.dev.crt
+    mongodb_file_tls_key: wildcard.planhat.dev.key
+    mongodb_file_tls_pem: wildcard.planhat.dev.pem
+    mongodb_secret_name_tls_keypassword: PEMKeyPassword
+    mongodb_secret_name_ca_crt: ca_crt
+    mongodb_secret_name_tls_crt: wildcard_planhat_dev_crt
+    mongodb_secret_name_tls_key: wildcard_planhat_dev_key
+    mongodb_secret_name_tls_pem: wildcard_planhat_dev_pem
 
   tasks:
 
@@ -36,6 +48,10 @@
       tags:
         - system
 
+    ## TODO:
+    # Set up GCP ops agent config
+    # https://cloud.google.com/stackdriver/docs/solutions/agents/ops-agent/third-party/mongodb
+
     - ansible.builtin.import_role:
         name: googlecloudplatform.google_cloud_ops_agents
       vars:
@@ -57,18 +73,6 @@
 
     - ansible.builtin.import_role:
         name: mongodb-replicaset
-      vars:
-        mongodb_storage_path: "{{ data_disk_path }}/mongodb"
-        mongodb_replica_set: rseu
-        mongodb_secret_name_tls_keypassword: PEMKeyPassword
-        mongodb_file_ca_crt: ca.crt
-        mongodb_file_tls_crt: wildcard.planhat.dev.crt
-        mongodb_file_tls_key: wildcard.planhat.dev.key
-        mongodb_file_tls_pem: wildcard.planhat.dev.pem
-        mongodb_secret_name_ca_crt: ca_crt
-        mongodb_secret_name_tls_crt: wildcard_planhat_dev_crt
-        mongodb_secret_name_tls_key: wildcard_planhat_dev_key
-        mongodb_secret_name_tls_pem: wildcard_planhat_dev_pem
 
     - ansible.builtin.import_role:
         name: nodejs

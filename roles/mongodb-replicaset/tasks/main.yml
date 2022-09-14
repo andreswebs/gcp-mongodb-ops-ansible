@@ -92,12 +92,13 @@
 - name: "Retrieve secret {{ mongodb_secret_name_tls_keypassword }}"
   ansible.builtin.command: "gcloud secrets versions access latest --secret {{ mongodb_secret_name_tls_keypassword }}"
   connection: local
+  delegate_to: localhost
   become: no
   run_once: true
-  delegate_to: localhost
-  register: mongodb_tls_keypassword
+  check_mode: false
+  changed_when: false
   no_log: "{{ not display_diff_secrets }}"
-  check_mode: no
+  register: mongodb_tls_keypassword
   environment:
     CLOUDSDK_CORE_PROJECT: "{{ lookup('ansible.builtin.env', 'CLOUDSDK_CORE_PROJECT') }}"
   tags:

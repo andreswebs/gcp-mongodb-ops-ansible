@@ -5,9 +5,10 @@ mongodb_version: '4.4'
 mongodb_key_url: "https://www.mongodb.org/static/pgp/server-{{ mongodb_version }}.asc"
 mongodb_key_file: "{{ mongodb_key_dir }}/mongodb-{{ mongodb_version }}.asc"
 
-mongodb_replica_set: rs0
+mongodb_replica_set_name: rs-default
 mongodb_secret_name_tls_keypassword: mongodb_tls_key_password
 mongodb_storage_path: /var/lib/mongodb
+mongodb_log_path: /var/log/mongodb/mongod.log
 
 mongodb_tls_dir: /etc/mongodb-tls
 mongodb_file_ca_crt: ca.crt
