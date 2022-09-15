@@ -30,7 +30,7 @@
   run_once: true
   check_mode: false
   changed_when: false
-  no_log: "{{ not display_diff_secrets }}"
+  no_log: "{{ not (display_diff_secrets | default(false) | bool) }}"
   register: mongodb_ca_crt
   environment:
     CLOUDSDK_CORE_PROJECT: "{{ lookup('ansible.builtin.env', 'CLOUDSDK_CORE_PROJECT') }}"
@@ -45,7 +45,7 @@
     owner: mongodb
     group: mongodb
     mode: '0600'
-  no_log: "{{ not display_diff_secrets }}"
+  no_log: "{{ not (display_diff_secrets | default(false) | bool) }}"
   tags:
     - mongodb
     - mongodb-tls
@@ -58,7 +58,7 @@
   run_once: true
   check_mode: false
   changed_when: false
-  no_log: "{{ not display_diff_secrets }}"
+  no_log: "{{ not (display_diff_secrets | default(false) | bool) }}"
   register: mongodb_tls_crt
   environment:
     CLOUDSDK_CORE_PROJECT: "{{ lookup('ansible.builtin.env', 'CLOUDSDK_CORE_PROJECT') }}"
@@ -73,7 +73,7 @@
     owner: mongodb
     group: mongodb
     mode: '0600'
-  no_log: "{{ not display_diff_secrets }}"
+  no_log: "{{ not (display_diff_secrets | default(false) | bool) }}"
   tags:
     - mongodb
     - mongodb-tls
@@ -86,7 +86,7 @@
   run_once: true
   check_mode: false
   changed_when: false
-  no_log: "{{ not display_diff_secrets }}"
+  no_log: "{{ not (display_diff_secrets | default(false) | bool) }}"
   register: mongodb_tls_key
   environment:
     CLOUDSDK_CORE_PROJECT: "{{ lookup('ansible.builtin.env', 'CLOUDSDK_CORE_PROJECT') }}"
@@ -101,7 +101,7 @@
     owner: mongodb
     group: mongodb
     mode: '0600'
-  no_log: "{{ not display_diff_secrets }}"
+  no_log: "{{ not (display_diff_secrets | default(false) | bool) }}"
   tags:
     - mongodb
     - mongodb-tls
@@ -114,7 +114,7 @@
   run_once: true
   check_mode: false
   changed_when: false
-  no_log: "{{ not display_diff_secrets }}"
+  no_log: "{{ not (display_diff_secrets | default(false) | bool) }}"
   register: mongodb_tls_pem
   environment:
     CLOUDSDK_CORE_PROJECT: "{{ lookup('ansible.builtin.env', 'CLOUDSDK_CORE_PROJECT') }}"
@@ -129,7 +129,7 @@
     owner: mongodb
     group: mongodb
     mode: '0600'
-  no_log: "{{ not display_diff_secrets }}"
+  no_log: "{{ not (display_diff_secrets | default(false) | bool) }}"
   tags:
     - mongodb
     - mongodb-tls

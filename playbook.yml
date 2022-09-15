@@ -61,6 +61,9 @@
       tags:
         - google-ops-agent
 
+    ## TODO:
+    # Set up GCP ops agent config
+    # https://cloud.google.com/stackdriver/docs/solutions/agents/ops-agent/third-party/mongodb
     - name: "Retrieve secret {{ mongodb_secret_name_monitor_password }}"
       ansible.builtin.command: "gcloud secrets versions access latest --secret {{ mongodb_secret_name_monitor_password }}"
       connection: local
@@ -69,7 +72,7 @@
       run_once: true
       check_mode: false
       changed_when: false
-      # no_log: not display_diff_secrets
+      no_log: "{{ not (display_diff_secrets | default(false) | bool) }}"
       register: mongodb_monitor_password
       environment:
         CLOUDSDK_CORE_PROJECT: "{{ lookup('ansible.builtin.env', 'CLOUDSDK_CORE_PROJECT') }}"
@@ -84,6 +87,7 @@
         owner: root
         group: root
         mode: '0644'
+      no_log: "{{ not (display_diff_secrets | default(false) | bool) }}"
       notify:
         - systemctl restart google-cloud-ops-agent
       tags:
