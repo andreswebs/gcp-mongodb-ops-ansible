@@ -9,7 +9,7 @@ systemLog:
   path: {{ mongodb_log_path }}
   logRotate: reopen
 net:
-  port: 27017
+  port: {{ mongodb_port | default(27017) }}
   bindIp: 0.0.0.0
   tls:
     mode: requireTLS

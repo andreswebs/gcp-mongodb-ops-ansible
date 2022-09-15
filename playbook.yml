@@ -17,11 +17,11 @@
     mongodb_file_tls_crt: wildcard.planhat.dev.crt
     mongodb_file_tls_key: wildcard.planhat.dev.key
     mongodb_file_tls_pem: wildcard.planhat.dev.pem
-    mongodb_secret_name_tls_keypassword: PEMKeyPassword
     mongodb_secret_name_ca_crt: ca_crt
     mongodb_secret_name_tls_crt: wildcard_planhat_dev_crt
-    mongodb_secret_name_tls_key: wildcard_planhat_dev_key
+    mongodb_secret_name_tls_key: wildcard_planhat_dev_key_nopw
     mongodb_secret_name_tls_pem: wildcard_planhat_dev_pem
+    mongodb_secret_name_tls_key_password: PEMKeyPassword
 
     mongodb_monitor_username: mongoMonitor
     mongodb_secret_name_monitor_password: mongodb_monitor_password
@@ -57,7 +57,6 @@
         name: googlecloudplatform.google_cloud_ops_agents
       vars:
         agent_type: ops-agent
-        main_config_file: ops-agent.config.yml
       tags:
         - google-ops-agent
 
