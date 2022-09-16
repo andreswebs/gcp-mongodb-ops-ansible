@@ -40,11 +40,13 @@
         autoclean: yes
       async: 3600
       poll: 5
+      when: upgrade_system | default(false) | bool
       tags:
         - system
 
     - name: Install / update google agents
       ansible.builtin.apt:
+        update_cache: yes
         name:
           - google-compute-engine
           - google-compute-engine-oslogin
