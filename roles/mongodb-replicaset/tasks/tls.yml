@@ -5,7 +5,7 @@
     state: directory
     owner: mongodb
     group: mongodb
-    mode: '0700'
+    mode: '0750'
   tags:
     - mongodb
     - mongodb-tls
@@ -16,6 +16,18 @@
     default: yes
     path: "{{ mongodb_tls_dir }}/.."
     etype: user
+    entity: mongodb
+    permissions: rX
+  tags:
+    - mongodb
+    - mongodb-tls
+
+- name: "Ensure mongodb group has read/execute permissions on {{ mongodb_tls_dir }}/.."
+  ansible.posix.acl:
+    state: present
+    default: yes
+    path: "{{ mongodb_tls_dir }}/.."
+    etype: group
     entity: mongodb
     permissions: rX
   tags:
@@ -44,7 +56,7 @@
     content: "{{ mongodb_ca_crt.stdout }}"
     owner: mongodb
     group: mongodb
-    mode: '0600'
+    mode: '0640'
   no_log: "{{ not (display_diff_secrets | default(false) | bool) }}"
   tags:
     - mongodb
@@ -72,7 +84,7 @@
     content: "{{ mongodb_tls_crt.stdout }}"
     owner: mongodb
     group: mongodb
-    mode: '0600'
+    mode: '0640'
   no_log: "{{ not (display_diff_secrets | default(false) | bool) }}"
   tags:
     - mongodb
@@ -100,7 +112,7 @@
     content: "{{ mongodb_tls_key.stdout }}"
     owner: mongodb
     group: mongodb
-    mode: '0600'
+    mode: '0640'
   no_log: "{{ not (display_diff_secrets | default(false) | bool) }}"
   tags:
     - mongodb
@@ -128,7 +140,7 @@
     content: "{{ mongodb_tls_pem.stdout }}"
     owner: mongodb
     group: mongodb
-    mode: '0600'
+    mode: '0640'
   no_log: "{{ not (display_diff_secrets | default(false) | bool) }}"
   tags:
     - mongodb

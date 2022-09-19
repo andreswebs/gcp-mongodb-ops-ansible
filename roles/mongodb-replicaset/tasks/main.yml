@@ -23,14 +23,14 @@
   tags:
     - mongodb
 
-- name: MongoDB | key
+- name: Add MongoDB archive key
   ansible.builtin.get_url:
     url: "{{ mongodb_key_url }}"
     dest: "{{ mongodb_key_file }}"
   tags:
     - mongodb
 
-- name: MongoDB | apt source
+- name: Add MongoDB apt repo
   ansible.builtin.apt_repository:
     repo: "deb [arch={{ deb_architecture.stdout }} signed-by={{ mongodb_key_file }}] https://repo.mongodb.org/apt/ubuntu {{ ansible_distribution_release }}/mongodb-org/{{ mongodb_version }} multiverse"
     state: present
@@ -38,7 +38,7 @@
   tags:
     - mongodb
 
-- name: MongoDB | install packages
+- name: Install packages
   ansible.builtin.apt:
     update_cache: yes
     name:
@@ -109,9 +109,9 @@
   ansible.builtin.template:
     src: mongod_replicaset.conf.j2
     dest: /etc/mongod.conf
-    owner: root
-    group: root
-    mode: '0644'
+    owner: mongodb
+    group: mongodb
+    mode: '0640'
   notify:
     - systemctl restart mongod
   no_log: "{{ not (display_diff_secrets | default(false) | bool) }}"

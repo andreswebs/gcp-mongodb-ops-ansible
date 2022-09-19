@@ -1,0 +1,9 @@
+---
+logging:
+  receivers:
+    mongodb:
+      type: mongodb
+  service:
+    pipelines:
+      mongo:
+        receivers: [ mongodb ]
