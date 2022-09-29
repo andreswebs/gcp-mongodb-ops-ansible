@@ -1,4 +1,6 @@
 ---
+mongodb_socket: /tmp/mongodb-27017.sock
+
 # mongodb_key_dir: /usr/share/keyrings ## why doesn't this work??
 mongodb_key_dir: /etc/apt/trusted.gpg.d ## unsecure
 mongodb_version: '4.4'

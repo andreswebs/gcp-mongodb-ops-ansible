@@ -1,14 +1,4 @@
 ---
-- name: "Ensure {{ mongodb_storage_path }} exists"
-  ansible.builtin.file:
-    path: "{{ mongodb_storage_path }}"
-    state: directory
-    owner: mongodb
-    group: mongodb
-  tags:
-    - mongodb
-    - mongodb-storage
-
 - name: Install dependencies
   ansible.builtin.apt:
     name:
@@ -51,6 +41,17 @@
   tags:
     - mongodb
 
+- name: "Set {{ mongodb_socket }} permissions"
+  ansible.builtin.file:
+    path: "{{ mongodb_socket }}"
+    state: file
+    owner: mongodb
+    group: mongodb
+    mode: '0600'
+  tags:
+    - mongodb
+    - mongodb-socket
+
 - name: Create /etc/systemd/system/mongod.service.d
   ansible.builtin.file:
     path: /etc/systemd/system/mongod.service.d
@@ -86,6 +87,16 @@
   tags:
     - mongodb
     - mongodb-logrotate
+
+- name: "Ensure {{ mongodb_storage_path }} exists"
+  ansible.builtin.file:
+    path: "{{ mongodb_storage_path }}"
+    state: directory
+    owner: mongodb
+    group: mongodb
+  tags:
+    - mongodb
+    - mongodb-storage
 
 - ansible.builtin.import_tasks: tls.yml
 
