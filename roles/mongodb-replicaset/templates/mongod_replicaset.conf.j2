@@ -1,8 +1,8 @@
 storage:
   dbPath: {{ mongodb_storage_path }}
+  engine: wiredTiger
   journal:
     enabled: true
-  engine: wiredTiger
 systemLog:
   destination: file
   logAppend: true

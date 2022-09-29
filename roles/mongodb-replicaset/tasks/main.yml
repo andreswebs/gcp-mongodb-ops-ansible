@@ -84,6 +84,7 @@
     owner: mongodb
     group: mongodb
     mode: u=rwX,g=X,o=X
+    recurse: yes
   notify:
     - systemctl restart mongod
   tags:
