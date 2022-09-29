@@ -41,17 +41,6 @@
   tags:
     - mongodb
 
-- name: "Set {{ mongodb_socket }} permissions"
-  ansible.builtin.file:
-    path: "{{ mongodb_socket }}"
-    state: file
-    owner: mongodb
-    group: mongodb
-    mode: '0600'
-  tags:
-    - mongodb
-    - mongodb-socket
-
 - name: Create /etc/systemd/system/mongod.service.d
   ansible.builtin.file:
     path: /etc/systemd/system/mongod.service.d
@@ -139,3 +128,15 @@
     - mongodb
     - mongodb-service
     - mongodb-service-config
+
+- name: "Set {{ mongodb_socket }} permissions"
+  ansible.builtin.file:
+    path: "{{ mongodb_socket }}"
+    state: file
+    owner: mongodb
+    group: mongodb
+    mode: '0600'
+  when: mongodb_set_socket_permissions | default(false) | bool
+  tags:
+    - mongodb
+    - mongodb-socket
