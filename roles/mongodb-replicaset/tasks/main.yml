@@ -77,12 +77,15 @@
     - mongodb
     - mongodb-logrotate
 
-- name: "Ensure {{ mongodb_storage_path }} exists"
+- name: "Set up {{ mongodb_storage_path }}"
   ansible.builtin.file:
     path: "{{ mongodb_storage_path }}"
     state: directory
     owner: mongodb
     group: mongodb
+    mode: u=rwX,g=X,o=X
+  notify:
+    - systemctl restart mongod
   tags:
     - mongodb
     - mongodb-storage
@@ -140,3 +143,12 @@
   tags:
     - mongodb
     - mongodb-socket
+
+- name: systemctl restart mongod
+  become: yes
+  ansible.builtin.service:
+    name: mongod
+    state: restarted
+  when: mongodb_restart | default(false) | bool
+  tags:
+    - mongodb-restart
