@@ -135,5 +135,12 @@
 
 ## these tasks can be triggered with specific tags and env vars
 ## they are used for one-off non-idempotent operations which should not always be run
-- ansible.builtin.include_tasks: non-idempotent.yml
+- name: Include non-idempotent tasks
+  ansible.builtin.include_tasks: non-idempotent.yml
   when: mongodb_non_idempotent | default(false) | bool
+  tags:
+    - mongodb-set-no-auth
+    - mongodb-socket
+    - mongodb-restart
+    - mongodb-start
+    - mongodb-stop
