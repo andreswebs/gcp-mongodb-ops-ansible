@@ -12,8 +12,7 @@
   vars:
     data_disk_path: /mnt/secure
     mongodb_storage_path: "{{ data_disk_path }}/mongodb"
-    # mongodb_replica_set_name: rseu
-    mongodb_replica_set_name: rseu-dr-drill
+    mongodb_replica_set_name: rseu
     mongodb_tls_dir: /etc/mongodb-tls
     mongodb_file_ca_crt: ca.crt
     mongodb_file_tls_crt: wildcard.planhat.dev.crt
@@ -61,13 +60,13 @@
       tags:
         - system
 
-    # - ansible.builtin.import_role:
-    #     name: googlecloudplatform.google_cloud_ops_agents
-    #   vars:
-    #     agent_type: ops-agent
-    #     # main_config_file: ops-agent.config.yml
-    #   tags:
-    #     - google-ops-agent
+    - ansible.builtin.import_role:
+        name: googlecloudplatform.google_cloud_ops_agents
+      vars:
+        agent_type: ops-agent
+        main_config_file: ops-agent.config.yml
+      tags:
+        - google-ops-agent
 
     # ## TODO:
     # # Set up GCP ops agent config
