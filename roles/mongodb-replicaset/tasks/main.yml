@@ -111,7 +111,7 @@
 
 - name: Set /etc/mongod.conf
   ansible.builtin.template:
-    src: mongod_replicaset.conf.j2
+    src: mongod.replicaset.conf.j2
     dest: /etc/mongod.conf
     owner: mongodb
     group: mongodb
@@ -133,23 +133,7 @@
     - mongodb-service
     - mongodb-service-config
 
-- name: "Set {{ mongodb_socket }} permissions"
-  ansible.builtin.file:
-    path: "{{ mongodb_socket }}"
-    state: file
-    owner: mongodb
-    group: mongodb
-    mode: '0600'
-  when: mongodb_set_socket_permissions | default(false) | bool
-  tags:
-    - mongodb
-    - mongodb-socket
-
-- name: systemctl restart mongod
-  become: yes
-  ansible.builtin.service:
-    name: mongod
-    state: restarted
-  when: mongodb_restart | default(false) | bool
-  tags:
-    - mongodb-restart
+## these tasks can be triggered with specific tags and env vars
+## they are used for one-off non-idempotent operations which should not always be run
+- ansible.builtin.include_tasks: non-idempotent.yml
+  when: mongodb_non_idempotent | default(false) | bool

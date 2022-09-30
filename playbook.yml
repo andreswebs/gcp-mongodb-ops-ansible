@@ -4,7 +4,8 @@
 
   hosts:
     # - vm_tag_db
-    - vm_tag_dr_drill_db
+    # - vm_tag_dr_drill_db
+    - vm_tag_demo_db
 
   become: yes
   become_user: root

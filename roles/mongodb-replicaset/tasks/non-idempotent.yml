@@ -1,0 +1,53 @@
+---
+- name: systemctl restart mongod
+  become: yes
+  ansible.builtin.service:
+    name: mongod
+    state: restarted
+  when: mongodb_restart | default(false) | bool
+  tags:
+    - mongodb-restart
+
+- name: systemctl stop mongod
+  become: yes
+  ansible.builtin.service:
+    name: mongod
+    state: stopped
+  when: mongodb_stop | default(false) | bool
+  tags:
+    - mongodb-stop
+
+- name: systemctl start mongod
+  become: yes
+  ansible.builtin.service:
+    name: mongod
+    state: started
+  when: mongodb_start | default(false) | bool
+  tags:
+    - mongodb-start
+
+- name: Set no-auth /etc/mongod.conf
+  ansible.builtin.template:
+    src: mongod.no-auth.conf.j2
+    dest: /etc/mongod.conf
+    owner: mongodb
+    group: mongodb
+    mode: '0640'
+  notify:
+    - systemctl restart mongod
+  no_log: "{{ not (display_diff_secrets | default(false) | bool) }}"
+  when: mongodb_set_no_auth | default(false) | bool
+  tags:
+    - mongodb-set-no-auth
+
+
+- name: "Set {{ mongodb_socket }} permissions"
+  ansible.builtin.file:
+    path: "{{ mongodb_socket }}"
+    state: file
+    owner: mongodb
+    group: mongodb
+    mode: '0600'
+  when: mongodb_set_socket_permissions | default(false) | bool
+  tags:
+    - mongodb-socket
