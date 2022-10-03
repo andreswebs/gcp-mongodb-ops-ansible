@@ -35,7 +35,7 @@
     - mongodb-tls
 
 - name: "Retrieve {{ mongodb_secret_name_ca_crt }} from Secret Manager"
-  ansible.builtin.command: "gcloud secrets versions access latest --secret ca_crt"
+  ansible.builtin.command: "gcloud secrets versions access latest --secret {{ mongodb_secret_name_ca_crt }}"
   connection: local
   delegate_to: localhost
   become: no
