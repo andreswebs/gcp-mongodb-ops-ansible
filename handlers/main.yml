@@ -1,6 +1,5 @@
 ---
 - name: systemctl restart google-cloud-ops-agent
-  become: yes
   ansible.builtin.service:
     name: google-cloud-ops-agent
     state: restarted

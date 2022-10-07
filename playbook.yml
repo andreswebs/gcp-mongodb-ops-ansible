@@ -37,7 +37,6 @@
     - name: Wait for VMs to start
       wait_for_connection:
 
-    # System update
     - name: Upgrade system
       ansible.builtin.apt:
         update_cache: yes

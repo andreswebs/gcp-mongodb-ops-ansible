@@ -51,7 +51,7 @@
     - mongodb-tls
 
 - name: "Write {{ mongodb_tls_dir }}/{{ mongodb_file_ca_crt }}"
-  copy:
+  ansible.builtin.copy:
     dest: "{{ mongodb_tls_dir }}/{{ mongodb_file_ca_crt }}"
     content: "{{ mongodb_ca_crt.stdout }}"
     owner: mongodb
