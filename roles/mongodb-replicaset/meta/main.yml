@@ -1,0 +1,12 @@
+galaxy_info:
+  author: Andre Silva
+  description: Configure an opinionated MongoDB replica set
+
+  license: Unlicense
+
+  min_ansible_version: 2.1
+
+  galaxy_tags:
+    - mongodb
+
+dependencies: []
