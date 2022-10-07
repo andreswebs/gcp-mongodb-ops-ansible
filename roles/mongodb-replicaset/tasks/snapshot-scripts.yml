@@ -1,0 +1,63 @@
+---
+- name: "Retrieve secret {{ mongodb_secret_name_admin_password }}"
+  ansible.builtin.command: "gcloud secrets versions access latest --secret {{ mongodb_secret_name_admin_password }}"
+  connection: local
+  delegate_to: localhost
+  become: no
+  run_once: true
+  check_mode: false
+  changed_when: false
+  no_log: "{{ not (display_diff_secrets | default(false) | bool) }}"
+  register: mongodb_admin_password
+  environment:
+    CLOUDSDK_CORE_PROJECT: "{{ lookup('ansible.builtin.env', 'CLOUDSDK_CORE_PROJECT') }}"
+  tags:
+    - mongodb
+    - mongodb-snapshots
+
+- name: Create /etc/google/snapshots
+  ansible.builtin.file:
+    path: /etc/google/snapshots
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  tags:
+    - mongodb
+    - mongodb-snapshots
+
+- name: Set /etc/google/snapshots/mongo-cmd.sh
+  ansible.builtin.template:
+    src: mongo-cmd.sh.j2
+    dest: /etc/google/snapshots/mongo-cmd.sh
+    owner: mongodb
+    group: mongodb
+    mode: '0600'
+  notify:
+    - systemctl restart mongod
+  no_log: "{{ not (display_diff_secrets | default(false) | bool) }}"
+  tags:
+    - mongodb
+    - mongodb-snapshots
+
+- name: Set /etc/google/snapshots/pre.sh
+  ansible.builtin.copy:
+    src: snapshot.pre.sh
+    dest: /etc/google/snapshots/pre.sh
+    owner: root
+    group: root
+    mode: '0700'
+  tags:
+    - mongodb
+    - mongodb-snapshots
+
+- name: Set /etc/google/snapshots/post.sh
+  ansible.builtin.copy:
+    src: snapshot.post.sh
+    dest: /etc/google/snapshots/post.sh
+    owner: root
+    group: root
+    mode: '0700'
+  tags:
+    - mongodb
+    - mongodb-snapshots

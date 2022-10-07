@@ -29,8 +29,8 @@
     mongodb_secret_name_tls_pem: demo_tls_pem
     mongodb_secret_name_tls_key_password: demo_tls_key_pw
 
-    mongodb_monitor_username: mongoMonitor
-    mongodb_secret_name_monitor_password: mongodb_monitor_password
+    mongodb_admin_username: mongoAdmin
+    mongodb_secret_name_admin_password: demo_mongodb_admin_password
 
   tasks:
 
@@ -113,10 +113,10 @@
         - mongodb
 
     - ansible.builtin.import_role:
-        name: mongodb-replicaset
+        name: nodejs
 
     - ansible.builtin.import_role:
-        name: nodejs
+        name: mongodb-replicaset
 
     - name: Check if a reboot is required
       ansible.builtin.shell: "[ -f /var/run/reboot-required ]"

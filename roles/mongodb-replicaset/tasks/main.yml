@@ -108,6 +108,7 @@
   tags:
     - mongodb
     - mongodb-config
+    - mongodb-snapshots
 
 - name: Set /etc/mongod.conf
   ansible.builtin.template:
@@ -132,6 +133,8 @@
     - mongodb
     - mongodb-service
     - mongodb-service-config
+
+- ansible.builtin.import_tasks: snapshot-scripts.yml
 
 ## these tasks can be triggered with specific tags and env vars;
 ## they are used for one-off non-idempotent operations which should not always be run
