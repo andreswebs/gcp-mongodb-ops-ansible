@@ -69,3 +69,30 @@
     mode: '0700'
   tags:
     - mongodb-snapshots
+
+- name: Ensure /etc/default directory exists
+  ansible.builtin.file:
+    path: /etc/default
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  tags:
+    - mongodb-snapshots
+
+# https://cloud.google.com/compute/docs/disks/creating-linux-application-consistent-pd-snapshots#config
+- name: Set /etc/default/instance_configs.cfg
+  ansible.builtin.blockinfile:
+    path: /etc/default/instance_configs.cfg
+    mode: '0644'
+    owner: root
+    group: root
+    create: true
+    block: |
+      [Snapshots]
+      enabled = true
+      timeout_in_seconds = 60
+  notify:
+    - systemctl restart google-guest-agent.service
+  tags:
+    - mongodb-snapshots

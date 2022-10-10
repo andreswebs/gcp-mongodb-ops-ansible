@@ -1,0 +1,6 @@
+---
+- name: systemctl restart google-guest-agent.service
+  become: yes
+  ansible.builtin.service:
+    name: google-guest-agent.service
+    state: restarted
