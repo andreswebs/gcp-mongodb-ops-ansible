@@ -43,8 +43,8 @@
   ansible.builtin.template:
     src: mongo-cmd.sh.j2
     dest: /etc/google/snapshots/mongo-cmd.sh
-    owner: mongodb
-    group: mongodb
+    owner: root
+    group: root
     mode: '0600'
   no_log: "{{ not (display_diff_secrets | default(false) | bool) }}"
   tags:
