@@ -1,0 +1,10 @@
+---
+mongodb_tls_dir: /etc/mongodb-tls
+mongodb_file_ca_crt: ca.crt
+mongodb_file_tls_pem: server.pem
+mongodb_secret_name_tls_key_password: mongodb_tls_key_password
+
+mongodb_admin_username: mongoadmin
+mongodb_secret_name_admin_password: mongodb_admin_password
+
+mongodb_domain_name: internal.dev

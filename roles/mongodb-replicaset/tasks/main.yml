@@ -134,8 +134,6 @@
     - mongodb-service
     - mongodb-service-config
 
-- ansible.builtin.import_tasks: snapshot-scripts.yml
-
 ## these tasks can be triggered with specific tags and env vars;
 ## they are used for one-off non-idempotent operations which should not always be run
 - name: Include non-idempotent tasks

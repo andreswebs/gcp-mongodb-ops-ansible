@@ -32,6 +32,8 @@
     mongodb_admin_username: mongoAdmin
     mongodb_secret_name_admin_password: demo_mongodb_admin_password
 
+    mongodb_domain_name: planhat.dev
+
   tasks:
 
     - name: Wait for VMs to start
@@ -46,17 +48,6 @@
       async: 3600
       poll: 5
       when: upgrade_system | default(false) | bool
-      tags:
-        - system
-
-    - name: Install / update google agents
-      ansible.builtin.apt:
-        update_cache: yes
-        name:
-          - google-compute-engine
-          - google-compute-engine-oslogin
-          - google-guest-agent
-          - google-osconfig-agent
       tags:
         - system
 
@@ -117,6 +108,9 @@
 
     - ansible.builtin.import_role:
         name: mongodb-replicaset
+
+    - ansible.builtin.import_role:
+        name: mongodb-gcp-snapshots
 
     - name: Check if a reboot is required
       ansible.builtin.shell: "[ -f /var/run/reboot-required ]"

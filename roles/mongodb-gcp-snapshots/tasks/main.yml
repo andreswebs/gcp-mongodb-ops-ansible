@@ -12,7 +12,21 @@
   environment:
     CLOUDSDK_CORE_PROJECT: "{{ lookup('ansible.builtin.env', 'CLOUDSDK_CORE_PROJECT') }}"
   tags:
-    - mongodb
+    - mongodb-snapshots
+
+- name: "Retrieve secret {{ mongodb_secret_name_tls_key_password }}"
+  ansible.builtin.command: "gcloud secrets versions access latest --secret {{ mongodb_secret_name_tls_key_password }}"
+  connection: local
+  delegate_to: localhost
+  become: no
+  run_once: true
+  check_mode: false
+  changed_when: false
+  no_log: "{{ not (display_diff_secrets | default(false) | bool) }}"
+  register: mongodb_tls_key_password
+  environment:
+    CLOUDSDK_CORE_PROJECT: "{{ lookup('ansible.builtin.env', 'CLOUDSDK_CORE_PROJECT') }}"
+  tags:
     - mongodb-snapshots
 
 - name: Create /etc/google/snapshots
@@ -23,7 +37,6 @@
     group: root
     mode: '0755'
   tags:
-    - mongodb
     - mongodb-snapshots
 
 - name: Set /etc/google/snapshots/mongo-cmd.sh
@@ -33,11 +46,8 @@
     owner: mongodb
     group: mongodb
     mode: '0600'
-  notify:
-    - systemctl restart mongod
   no_log: "{{ not (display_diff_secrets | default(false) | bool) }}"
   tags:
-    - mongodb
     - mongodb-snapshots
 
 - name: Set /etc/google/snapshots/pre.sh
@@ -48,7 +58,6 @@
     group: root
     mode: '0700'
   tags:
-    - mongodb
     - mongodb-snapshots
 
 - name: Set /etc/google/snapshots/post.sh
@@ -59,5 +68,4 @@
     group: root
     mode: '0700'
   tags:
-    - mongodb
     - mongodb-snapshots
