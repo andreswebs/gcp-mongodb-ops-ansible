@@ -12,34 +12,23 @@
     data_disk_path: /mnt/secure
     mongodb_storage_path: "{{ data_disk_path }}/mongodb"
 
-    mongodb_replica_set_name: rs1 # PROD: us1
-    # mongodb_replica_set_name: rseu
+    mongodb_replica_set_name: rs-dev
 
     mongodb_tls_dir: /etc/mongodb-tls
 
     mongodb_file_ca_crt: ca.crt
-    mongodb_file_tls_crt: wildcard.planhat.dev.crt
-    mongodb_file_tls_key: wildcard.planhat.dev.key
-    mongodb_file_tls_pem: wildcard.planhat.dev.pem
+    mongodb_file_tls_crt: server.crt
+    mongodb_file_tls_key: server.key
+    mongodb_file_tls_pem: server.pem
 
     mongodb_secret_name_ca_crt: ca_crt
 
-    mongodb_secret_name_tls_crt: wildcard_planhat_dev_crt
-    mongodb_secret_name_tls_key: wildcard_planhat_dev_key
-    mongodb_secret_name_tls_pem: wildcard_planhat_dev_pem
+    mongodb_secret_name_tls_crt: tls_crt
+    mongodb_secret_name_tls_key: tls_key
+    mongodb_secret_name_tls_pem: tls_pem
+    mongodb_secret_name_tls_key_password: tls_key_pw
 
-    mongodb_secret_name_tls_key_password: wildcard_planhat_dev_key_pw
-    # mongodb_secret_name_tls_key_password: PEMKeyPassword
-
-    # mongodb_secret_name_ca_crt: demo_ca_crt
-    # mongodb_secret_name_tls_crt: demo_tls_crt
-    # mongodb_secret_name_tls_key: demo_tls_key
-    # mongodb_secret_name_tls_pem: demo_tls_pem
-    # mongodb_secret_name_tls_key_password: demo_tls_key_pw
-
-    mongodb_admin_username: mongoAdmin
-
-    mongodb_domain_name: planhat.dev
+    mongodb_admin_username: mongoadmin
 
   tasks:
 

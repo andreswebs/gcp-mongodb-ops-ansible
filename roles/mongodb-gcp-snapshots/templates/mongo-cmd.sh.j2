@@ -3,8 +3,7 @@
 MONGO_TLS_CA_FILE="{{ mongodb_tls_dir }}/{{ mongodb_file_ca_crt }}"
 MONGO_TLS_KEY_FILE="{{ mongodb_tls_dir }}/{{ mongodb_file_tls_pem }}"
 MONGO_TLS_KEY_FILE_PASSWORD='{{ mongodb_tls_key_password.stdout }}'
-MONGO_DOMAIN="{{ mongodb_domain_name }}"
-MONGO_HOST="$(hostname).${MONGO_DOMAIN}"
+MONGO_HOST="$(hostname -f)"
 MONGO_USERNAME="{{ mongodb_admin_username }}"
 MONGO_PASSWORD='{{ mongodb_admin_password.stdout }}'
 
