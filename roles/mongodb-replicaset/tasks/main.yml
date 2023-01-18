@@ -6,6 +6,7 @@
       - acl
   tags:
     - mongodb
+    - mongodb-install
 
 - name: DEB architecture
   ansible.builtin.shell: dpkg --print-architecture
@@ -13,6 +14,7 @@
   changed_when: false
   tags:
     - mongodb
+    - mongodb-install
 
 - name: Add MongoDB archive key
   ansible.builtin.get_url:
@@ -20,6 +22,7 @@
     dest: "{{ mongodb_key_file }}"
   tags:
     - mongodb
+    - mongodb-install
 
 - name: Add MongoDB apt repo
   ansible.builtin.apt_repository:
@@ -28,6 +31,7 @@
     filename: "mongodb-org-{{ mongodb_version }}"
   tags:
     - mongodb
+    - mongodb-install
 
 - name: Install packages
   ansible.builtin.apt:
@@ -41,6 +45,7 @@
       - python3-pymongo
   tags:
     - mongodb
+    - mongodb-install
 
 - name: Create /etc/systemd/system/mongod.service.d
   ansible.builtin.file:
@@ -109,7 +114,6 @@
   tags:
     - mongodb
     - mongodb-config
-    - mongodb-snapshots
 
 - name: Set /etc/mongod.conf
   ansible.builtin.template:

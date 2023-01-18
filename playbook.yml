@@ -23,12 +23,19 @@
 
     mongodb_secret_name_ca_crt: ca_crt
 
-    mongodb_secret_name_tls_crt: tls_crt
-    mongodb_secret_name_tls_key: tls_key
-    mongodb_secret_name_tls_pem: tls_pem
-    mongodb_secret_name_tls_key_password: tls_key_pw
+    # mongodb_secret_name_tls_crt: tls_crt
+    # mongodb_secret_name_tls_key: tls_key
+    # mongodb_secret_name_tls_pem: tls_pem
+    # mongodb_secret_name_tls_key_password: tls_key_pw
 
-    mongodb_admin_username: mongoadmin
+    # mongodb_admin_username: mongoadmin
+
+    mongodb_secret_name_tls_crt: wildcard_planhat_dev_tls_crt
+    mongodb_secret_name_tls_key: wildcard_planhat_dev_tls_key
+    mongodb_secret_name_tls_pem: wildcard_planhat_dev_tls_pem
+    mongodb_secret_name_tls_key_password: wildcard_planhat_dev_tls_key_pw
+
+    mongodb_admin_username: atlasBackupTMP
 
   tasks:
 
