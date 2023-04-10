@@ -108,6 +108,7 @@
     owner: mongodb
     group: mongodb
     mode: '0640'
+    lstrip_blocks: true
   notify:
     - systemctl restart mongod
   no_log: "{{ not (display_diff_secrets | default(false) | bool) }}"
