@@ -21,21 +21,13 @@
     mongodb_file_tls_key: server.key
     mongodb_file_tls_pem: server.pem
 
-    mongodb_secret_name_ca_crt: ca_crt
-
-    # mongodb_secret_name_tls_crt: tls_crt
-    # mongodb_secret_name_tls_key: tls_key
-    # mongodb_secret_name_tls_pem: tls_pem
-    # mongodb_secret_name_tls_key_password: tls_key_pw
-
-    # mongodb_admin_username: mongoadmin
-
+    mongodb_secret_name_ca_crt: planhat_dev_ca_crt
     mongodb_secret_name_tls_crt: wildcard_planhat_dev_tls_crt
     mongodb_secret_name_tls_key: wildcard_planhat_dev_tls_key
     mongodb_secret_name_tls_pem: wildcard_planhat_dev_tls_pem
     mongodb_secret_name_tls_key_password: wildcard_planhat_dev_tls_key_pw
 
-    mongodb_admin_username: atlasBackupTMP
+    mongodb_admin_username: mongoAdmin
 
   tasks:
 
@@ -99,12 +91,12 @@
     # - ansible.builtin.import_role:
     #     name: www-user
 
-    - ansible.builtin.import_role:
-        name: extra-disk
-      vars:
-        extra_disk_mount_path: "{{ data_disk_path }}"
-      tags:
-        - mongodb
+    # - ansible.builtin.import_role:
+    #     name: extra-disk
+    #   vars:
+    #     extra_disk_mount_path: "{{ data_disk_path }}"
+    #   tags:
+    #     - mongodb
 
     - ansible.builtin.import_role:
         name: nodejs

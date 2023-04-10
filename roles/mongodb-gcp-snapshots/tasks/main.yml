@@ -24,6 +24,7 @@
   changed_when: false
   no_log: "{{ not (display_diff_secrets | default(false) | bool) }}"
   register: mongodb_tls_key_password
+  when: mongodb_tls_key_password_enabled | default(false) | bool
   environment:
     CLOUDSDK_CORE_PROJECT: "{{ lookup('ansible.builtin.env', 'CLOUDSDK_CORE_PROJECT') }}"
   tags:

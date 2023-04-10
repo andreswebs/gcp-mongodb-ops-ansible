@@ -21,6 +21,8 @@ mongodb_secret_name_tls_pem: mongodb_tls_pem
 mongodb_secret_name_tls_key: mongodb_tls_key
 mongodb_secret_name_tls_key_password: mongodb_tls_key_password
 
+mongodb_tls_key_password_enabled: false
+
 mongodb_monitor_username: mongomonitor
 mongodb_secret_name_monitor_password: mongodb_monitor_password
 

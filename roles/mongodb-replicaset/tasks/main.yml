@@ -97,23 +97,9 @@
     - mongodb
     - mongodb-storage
 
-- ansible.builtin.import_tasks: tls.yml
+- ansible.builtin.import_tasks: secrets.yml
 
-- name: "Retrieve secret {{ mongodb_secret_name_tls_key_password }}"
-  ansible.builtin.command: "gcloud secrets versions access latest --secret {{ mongodb_secret_name_tls_key_password }}"
-  connection: local
-  delegate_to: localhost
-  become: no
-  run_once: true
-  check_mode: false
-  changed_when: false
-  no_log: "{{ not (display_diff_secrets | default(false) | bool) }}"
-  register: mongodb_tls_key_password
-  environment:
-    CLOUDSDK_CORE_PROJECT: "{{ lookup('ansible.builtin.env', 'CLOUDSDK_CORE_PROJECT') }}"
-  tags:
-    - mongodb
-    - mongodb-config
+- ansible.builtin.import_tasks: tls.yml
 
 - name: Set /etc/mongod.conf
   ansible.builtin.template:

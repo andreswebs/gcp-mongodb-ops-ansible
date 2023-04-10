@@ -1,3 +1,4 @@
+---
 storage:
   dbPath: {{ mongodb_storage_path }}
   engine: wiredTiger
@@ -14,7 +15,9 @@ net:
   tls:
     mode: requireTLS
     certificateKeyFile: {{ mongodb_tls_dir }}/{{ mongodb_file_tls_pem }}
+    {%- if mongodb_tls_key_password_enabled %}
     certificateKeyFilePassword: {{ mongodb_tls_key_password.stdout }}
+    {%- endif %}
     CAFile: {{ mongodb_tls_dir }}/{{ mongodb_file_ca_crt }}
 processManagement:
   fork: false
