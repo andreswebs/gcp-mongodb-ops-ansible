@@ -9,9 +9,6 @@
   become_user: root
 
   vars:
-    data_disk_path: /mnt/secure
-    mongodb_storage_path: "{{ data_disk_path }}/mongodb"
-
     mongodb_replica_set_name: rs-dev
 
     mongodb_tls_dir: /etc/mongodb-tls
@@ -86,17 +83,6 @@
     #   tags:
     #     - google-ops-agent
     #     - google-ops-agent-config
-
-    # # DEPRECATED:
-    # - ansible.builtin.import_role:
-    #     name: www-user
-
-    # - ansible.builtin.import_role:
-    #     name: extra-disk
-    #   vars:
-    #     extra_disk_mount_path: "{{ data_disk_path }}"
-    #   tags:
-    #     - mongodb
 
     - ansible.builtin.import_role:
         name: nodejs
