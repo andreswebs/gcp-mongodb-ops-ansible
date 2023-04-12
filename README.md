@@ -39,11 +39,11 @@ Secrets in GCP Secret Manager (names are configurable through vars):
 ./playbook.yml -i inventory/dev.gcp.yml -e mongodb_non_idempotent=true -e mongodb_set_no_auth=true --tags mongodb-set-no-auth
 ```
 
-3. Connect to the primary and initiate the replicaset:
+3. Connect to the primary and initiate the replicaset
 
 4. Connect to the primary and create an admin user in the replicaset
 
-5. Run the playbook again to restore TLS authentication:
+5. Run the playbook again to restore TLS authentication
 
 ```sh
 ./playbook.yml -i inventory/dev.gcp.yml --tags mongodb-config
