@@ -47,6 +47,7 @@
     owner: root
     group: root
     mode: '0600'
+    lstrip_blocks: true
   no_log: "{{ not (display_diff_secrets | default(false) | bool) }}"
   tags:
     - mongodb-snapshots
