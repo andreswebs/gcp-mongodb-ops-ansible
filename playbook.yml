@@ -47,42 +47,41 @@
         name: googlecloudplatform.google_cloud_ops_agents
       vars:
         agent_type: ops-agent
-        main_config_file: ops-agent.config.yml
+        # main_config_file: ops-agent.config.yml
       tags:
         - google-ops-agent
 
-    # ## TODO:
-    # # Set up GCP ops agent config
-    # # https://cloud.google.com/stackdriver/docs/solutions/agents/ops-agent/third-party/mongodb
-    # - name: "Retrieve secret {{ mongodb_secret_name_monitor_password }}"
-    #   ansible.builtin.command: "gcloud secrets versions access latest --secret {{ mongodb_secret_name_monitor_password }}"
-    #   connection: local
-    #   delegate_to: localhost
-    #   become: no
-    #   run_once: true
-    #   check_mode: false
-    #   changed_when: false
-    #   no_log: "{{ not (display_diff_secrets | default(false) | bool) }}"
-    #   register: mongodb_monitor_password
-    #   environment:
-    #     CLOUDSDK_CORE_PROJECT: "{{ lookup('ansible.builtin.env', 'CLOUDSDK_CORE_PROJECT') }}"
-    #   tags:
-    #     - google-ops-agent
-    #     - google-ops-agent-config
+    # Set up GCP ops agent config
+    # https://cloud.google.com/stackdriver/docs/solutions/agents/ops-agent/third-party/mongodb
+    - name: "Retrieve secret {{ mongodb_secret_name_monitor_password }}"
+      ansible.builtin.command: "gcloud secrets versions access latest --secret {{ mongodb_secret_name_monitor_password }}"
+      connection: local
+      delegate_to: localhost
+      become: no
+      run_once: true
+      check_mode: false
+      changed_when: false
+      no_log: "{{ not (display_diff_secrets | default(false) | bool) }}"
+      register: mongodb_monitor_password
+      environment:
+        CLOUDSDK_CORE_PROJECT: "{{ lookup('ansible.builtin.env', 'CLOUDSDK_CORE_PROJECT') }}"
+      tags:
+        - google-ops-agent
+        - google-ops-agent-config
 
-    # - name: Set /etc/google-cloud-ops-agent/config.yaml
-    #   ansible.builtin.template:
-    #     src: ops-agent.config.yml.j2
-    #     dest: /etc/google-cloud-ops-agent/config.yaml
-    #     owner: root
-    #     group: root
-    #     mode: '0644'
-    #   no_log: "{{ not (display_diff_secrets | default(false) | bool) }}"
-    #   notify:
-    #     - systemctl restart google-cloud-ops-agent
-    #   tags:
-    #     - google-ops-agent
-    #     - google-ops-agent-config
+    - name: Set /etc/google-cloud-ops-agent/config.yaml
+      ansible.builtin.template:
+        src: ops-agent.config.yml.j2
+        dest: /etc/google-cloud-ops-agent/config.yaml
+        owner: root
+        group: root
+        mode: '0644'
+      no_log: "{{ not (display_diff_secrets | default(false) | bool) }}"
+      notify:
+        - systemctl restart google-cloud-ops-agent
+      tags:
+        - google-ops-agent
+        - google-ops-agent-config
 
     - ansible.builtin.import_role:
         name: nodejs
